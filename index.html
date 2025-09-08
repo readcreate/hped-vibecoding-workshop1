@@ -156,6 +156,12 @@
         <div class="grid-1">
           <div>
             <hr>
+            <h3>Reference information</h3>
+            <ol class="list">
+              <li>This workshop guide is available at <a href="https://tinyurl.com/hpedVibe" target="_blank">https://tinyurl.com/hpedVibe</a></li>
+            </ol>
+            <p></p>
+            <hr>
             <h3>Learning objectives</h3>
             <ol class="list">
               <li>Test out an example of a vibe-coded interactive educational tool and see how it was created using a generative AI platform.</li>
@@ -172,9 +178,10 @@
             <ol class="list">
               <li>What is vibe coding? (3:30 p.m. ET)</li>
               <li>Kirkpatrick Levels example (3:40)</li>
-              <li>Make a new app with entire class (3:55)</li>
-              <li>Make your own new app in small groups (4:15)</li>
-              <li>Share apps (4:35)</li>
+              <li>Make a new app with entire class (3:50)</li>
+              <li>Make your own new app in small groups (4:10)</li>
+              <li>Share apps (4:30)</li>
+              <li>Knowledge check (4:45)</li>
               <li>Discussion and wrap-up (4:50)</li>
 
             </ol>
@@ -235,18 +242,56 @@
         <h2>Let's start with an example - Kirkpatrick Levels</h2>
         <p></p>
         <hr>
-        <h3>Please complete the following interactive learning activity:</h3>
-        <div class="placeholder">
+        <h3>Interactive activity</h3>
+        <p>Please complete the following interactive learning activity. You can refresh this web page if you need to start over.</p>
+        <!-- <div class="placeholder"> -->
+  <iframe src="kirkpatrickHpedV2vanillaJS.html" 
+          style="width:100%; height:800px; border:2px solid var(--border); border-radius:12px;">
+  </iframe>
+<!-- </div> -->
+
+        <!-- <div class="placeholder">
           <strong>Activity placeholder</strong>
           <p>This boxed container will later host the interactive Kirkpatrick drag-and-drop activity code.</p>
-        </div>
+        </div> -->
         <p></p>
         <hr>
         <h3 class="mt-12">How was this activity created?</h3>
+        <p>The following prompts were given to Chat GPT to make the Kirkpatrick Levels activity app above.</p>
         <div class="placeholder">
-          <strong>Creation transcript placeholder</strong>
-          <p>This boxed container will later host the chat transcript explaining how the activity was created.</p>
+          <p><em>Please make a simple app to knowledge-check my students on Kirkpatrick levels in healthcare with a drag-and-drop interface and built-in validation. At least two examples per Kirkpatrick level.</em></p>
         </div>
+
+        <div class="placeholder">
+          <p><em>identify right and wrong answers immediately when dragged once dragged, remove item from list of options. change options from questions (as they are now) to example situations.</em></p>
+        </div>
+
+        <div class="placeholder">
+          <p><em>need to randomly reorder the situation choices</em></p>
+        </div>
+
+        <div class="placeholder">
+          <p><em>Excellent. Please keep everything the same but add a short note at the top like this: What are the Kirkpatrick levels and how are they useful in health professions education? [2-3 sentence explanation]</em></p>
+        </div>
+
+        <div class="placeholder">
+          <p><em>the text you added at the top is great. please left-justify it and format it nicely/fancily for simpler reading</em></p>
+        </div>
+
+        <div class="placeholder">
+          <p><em>as i drag items from left to right, right side fills up and i have to scroll to see bottom. but remaining options on left (not yet dragged and dropped) stay at top. these remaining options should scroll along with user for easier selecting.</em></p>
+        </div>
+
+        <div class="placeholder">
+          <p><em>i'm not able to paste this code into an online realtime html editor. the editor says: The HTML code contains potentially unsafe content that has been blocked for security reasons:</em></p>
+        </div>
+
+        <div class="placeholder">
+          <p><em>Please remove external scripts and make it plain HTML + vanilla JS.</em></p>
+        </div>
+
+        
+
         <p></p>
         <hr>
         <h3 class="mt-12">Discuss the Kirkpatrick activity</h3>
@@ -321,10 +366,10 @@
         <h3 class="mt-12">Write a prompt</h3>
         <p>For this part of the workshop, we need one volunteer to share their screen with the entire group. The volunteer should have this workshop guide and a generative AI chatbot open in a web browser, with sidebar and any other private information hidden.</p>
         <div class="callout">
-          <p class="mb-8"><strong>Prompt</strong></p>
+          <p class="mb-8"><strong>Prompt generator</strong></p>
           <label class="mb-8" for="topicBox">Topic for the app:</label>
           <input id="topicBox" type="text" placeholder="e.g., Medication safety basics" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:#0b1030; color:var(--text)">
-          <p class="mt-12">Please make a simple educational app that my learners can use that is a) interactive and gamified using HTML and JavaScript (vanilla JavaScript only, so that it can be used without external components and easily embedded in other places) and b) gives the user feedback about right and wrong answers. The app should be about this topic: <span id="promptTopic">[empty text box]</span>.</p>
+          <p class="mt-12">Please make a simple educational app that my learners can use that is a) interactive and gamified using HTML and JavaScript (vanilla JavaScript only, so that it can be used without external components and easily embedded in other places) and b) gives the user feedback about right and wrong answers. The app should be about this topic: <span id="promptTopic">___________</span>.</p>
           <div class="button-row">
             <button class="btn" id="btnCopyPrompt"><span>📋</span>Copy prompt</button>
           </div>
@@ -364,7 +409,7 @@
         <hr>
 
         <h3 class="mt-12">Give the chatbot a prompt</h3>
-        <p>Use the prompt that we drafted above.</p>
+        <p>Use the prompt generator from our previous activity to make a new prompt. You can type a new topic into the box.</p>
         <div class="button-row">
           <button class="btn" id="btnCopyPrompt2"><span>📋</span>Copy prompt again</button>
         </div>
