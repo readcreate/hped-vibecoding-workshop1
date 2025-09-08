@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workshop Guide • Exploring generative AI in health professions education: simple interactive apps with vibe coding</title>
+  <style>
+    :root{
+      --bg: #0f1226;
+      --panel: #14183a;
+      --panel-2: #1d2255;
+      --text: #f7f7ff;
+      --muted: #cfd3ff;
+      --brand: #7c4dff;
+      --brand-2: #00e5ff;
+      --accent-1:#ff4081;
+      --accent-2:#4caf50;
+      --accent-3:#ffc107;
+      --danger:#ff5370;
+      --border: rgba(255,255,255,0.12);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius-xl: 18px;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --gap: 16px;
+      --gap-sm: 10px;
+      --gap-lg: 22px;
+      --trans: 200ms ease;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; background: radial-gradient(1200px 800px at 10% 0%, #1a1e45, #0f1226), var(--bg);
+      color: var(--text); font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    a{color: var(--brand-2); text-decoration: none;} a:hover{text-decoration: underline;}
+
+    /* Layout */
+    .app{display:grid; grid-template-columns: 300px 1fr; gap: var(--gap); max-width: 1200px; margin: 0 auto; padding: 16px;}
+    @media (max-width: 900px){ .app{grid-template-columns: 1fr;} #sidebar{position: fixed; inset: 0 40% 0 0; max-width: 380px; transform: translateX(-101%); transition: transform var(--trans); z-index: 30;} #sidebar.open{transform: translateX(0);} .outline-toggle{display:inline-flex;} }
+
+    header.top{
+      grid-column: 1 / -1; background: linear-gradient(135deg, rgba(124,77,255,.25), rgba(0,229,255,.25));
+      border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 18px; box-shadow: var(--shadow);
+    }
+    header.top h1{margin: 0 0 8px; font-size: clamp(20px, 3vw, 28px)}
+    header .meta{display:flex; flex-wrap:wrap; gap: 10px; color: var(--muted);}
+    .chip{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border:1px solid var(--border); background: rgba(255,255,255,0.03); border-radius: 999px}
+
+    /* Sidebar */
+    #sidebar{position: sticky; top: 16px; align-self: start; background: linear-gradient(160deg, var(--panel), var(--panel-2)); border:1px solid var(--border); border-radius: var(--radius-xl); padding: 14px; box-shadow: var(--shadow);}
+    #sidebar h2{margin: 0 0 8px; font-size: 16px; color: var(--muted)}
+    #toc{display:flex; flex-direction:column; gap: 4px; max-height: 70vh; overflow:auto; padding-right: 6px;}
+    #toc a{display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius: var(--radius-sm); border:1px solid transparent;}
+    #toc a:hover{background: rgba(255,255,255,0.06); border-color: var(--border)}
+    #toc a.active{background: rgba(124,77,255,0.25); border-color: rgba(124,77,255,0.5)}
+
+    /* Main */
+    main{display:flex; flex-direction:column; gap: var(--gap);} 
+    section.card{background: linear-gradient(160deg, var(--panel), #0f153b); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 18px; box-shadow: var(--shadow);} 
+    section.card h2, section.card h3, section.card h4{margin-top:0}
+
+    .badge{display:inline-flex; align-items:center; gap:8px; padding:6px 9px; border-radius: 999px; background: rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.35); color: #b1f6ff; font-weight:600}
+
+    .btn{--b: var(--brand); --fg: #fff; display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 12px; border:1px solid color-mix(in oklab, var(--b), black 20%); background: linear-gradient(180deg, color-mix(in oklab, var(--b), #ffffff 10%), var(--b)); color: var(--fg); cursor:pointer; transition: transform var(--trans), filter var(--trans), box-shadow var(--trans); box-shadow: 0 8px 20px color-mix(in oklab, var(--b), black 70%);
+    }
+    .btn:hover{transform: translateY(-1px); filter: brightness(1.05);} 
+    .btn:active{transform: translateY(0);} 
+    .btn.secondary{--b: #3949ab}
+    .btn.ghost{background: transparent; border:1px dashed var(--border); color: var(--muted); box-shadow:none}
+    .btn.success{--b: var(--accent-2)}
+    .btn.warn{--b: var(--accent-3); color:#1c1400}
+    .btn.danger{--b: var(--danger)}
+
+    .button-row{display:flex; gap: 10px; flex-wrap: wrap}
+
+    .placeholder{border:2px dashed rgba(255,255,255,0.35); border-radius: var(--radius); padding: 16px; margin-top: 8px; background: rgba(255,255,255,0.03)}
+
+    .list{margin: 10px 0 0 0; padding-left: 18px}
+    .list li{margin: 6px 0}
+
+    .muted{color: var(--muted)}
+
+    .callout{padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: rgba(255,255,255,0.06)}
+
+    .kbd{display:inline-block; padding: 2px 6px; border:1px solid var(--border); border-bottom-width:3px; border-radius: 6px; background: #0a0d22; color:#d6dbff; font-weight:600}
+
+    /* Floating controls */
+    .floating-next{position: fixed; right: 18px; bottom: 18px; z-index: 40; display:flex; gap:10px;}
+    .floating-pop{position: fixed; left: 18px; bottom: 18px; z-index: 40;}
+
+    .outline-toggle{display:none; position: fixed; left: 18px; top: 18px; z-index: 40}
+
+    /* Collapsible */
+    .collapsible .content{display:none; margin-top: 10px}
+    .collapsible.open .content{display:block}
+
+    /* Quiz */
+    .quiz{display:grid; gap: 16px}
+    .quiz .q{padding: 12px; border:1px solid var(--border); border-radius: var(--radius); background: rgba(255,255,255,0.04)}
+    .quiz .choices{display:grid; gap:8px; margin-top:10px}
+    .quiz .choices label{display:flex; gap:10px; align-items:center; background: rgba(255,255,255,0.04); padding:8px 10px; border-radius: 10px; cursor:pointer; border:1px solid transparent}
+    .quiz .choices input{accent-color: var(--brand)}
+    .quiz .choices label:hover{border-color: var(--border)}
+    .quiz .result{margin-top: 8px; font-weight: 600}
+
+    /* Utility */
+    .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap);} 
+    @media (max-width: 900px){.grid-2{grid-template-columns:1fr}}
+    .mt-0{margin-top:0}
+    .mb-0{margin-bottom:0}
+    .mb-8{margin-bottom:8px}
+    .mb-12{margin-bottom:12px}
+    .mb-16{margin-bottom:16px}
+    .mb-24{margin-bottom:24px}
+    .mt-12{margin-top:12px}
+
+
+
+    img {
+  max-width: 100%;   /* don’t overflow parent */
+  height: auto;      /* scale proportionally */
+  display: block;    /* removes inline whitespace gaps */
+}
+
+  </style>
+</head>
+<body>
+  <button class="btn outline-toggle" id="btnToggleOutline">📑 Outline</button>
+  <div class="app">
+    <header class="top">
+      <h1>Exploring generative AI in health professions education: simple interactive apps with vibe coding</h1>
+      <div class="meta">
+        <span class="chip" title="Time"><span>🕒</span> 3:30–5:00 p.m. ET · Monday Sep 7, 2025</span>
+        <span class="chip" title="Instructor"><span>👤</span> Instructor: <a href="mailto:akumar@mghihp.edu">Anshul Kumar</a></span>
+        <span class="chip" title="Mode"><span>🖥️</span> Virtual · Synchronous</span>
+      </div>
+    </header>
+
+    <!-- Sidebar / Outline -->
+    <aside id="sidebar">
+      <h2>Workshop Outline</h2>
+      <div class="button-row mb-12">
+        <!-- <button class="btn secondary" id="btnPopOut"><span>🪟</span>Pop out</button> -->
+        <button class="btn ghost" id="btnBackToTop"><span>⬆️</span>Top</button>
+      </div>
+      <nav id="toc"></nav>
+      <p class="muted" style="margin-top:10px">Tip: Use <span class="kbd">J</span>/<span class="kbd">K</span> to go next/prev section.</p>
+    </aside>
+
+    <!-- Main content -->
+    <main id="content">
+
+      <section class="card" data-title="# Workshop introduction">
+        <h2>Workshop introduction</h2>
+        <p>Please follow along with this workshop guide on your own computer.</p>
+        <div class="grid-1">
+          <div>
+            <hr>
+            <h3>Learning objectives</h3>
+            <ol class="list">
+              <li>Test out an example of a vibe-coded interactive educational tool and see how it was created using a generative AI platform.</li>
+              <li>Iteratively create an interactive educational tool that you can use in your own teaching.</li>
+              <li>Discuss risks and benefits of vibe coding in your work as an educator.</li>
+            </ol>
+          </div>
+          <div>
+            <p></p>
+            <hr>
+            
+            <h3>Agenda</h3>
+            <p>Main items:</p>
+            <ol class="list">
+              <li>What is vibe coding? (3:30 p.m. ET)</li>
+              <li>Kirkpatrick Levels example (3:40)</li>
+              <li>Make a new app with entire class (3:55)</li>
+              <li>Make your own new app in small groups (4:15)</li>
+              <li>Share apps (4:35)</li>
+              <li>Discussion and wrap-up (4:50)</li>
+
+            </ol>
+
+            <p>If we finish early:</p>
+
+            <ol class="list">
+              <li>Upload app to learning management system (LMS)</li>
+              <li>Upload app online for public use</li>
+            </ol>
+          </div>
+
+
+
+
+          <div>
+            <p></p>
+            <hr>
+            
+            <h3>What is vibe coding?</h3>
+            <p>Vibe coding is a way to write the code for an app by describing to a generative AI tool what you want the app to do and how you want it to look.</p>
+            
+
+            <p>Examples (written by Chat GPT):</p>
+
+            <ol class="list">
+              <li>Interactive teaching tools: quickly generating simple quiz apps, flashcards, or drag-and-drop activities for classrooms.</li>
+              <li>Rapid prototypes: building small web apps or dashboards to test an idea before investing in full development.</li>
+              <li>Workflow helpers: making lightweight scripts or utilities (e.g., file renamers, CSV cleaners, or text analyzers) that improve daily productivity.</li>
+            </ol>
+          </div>
+
+
+
+        </div>
+        <!-- <div class="grid-2 mt-12">
+          <div>
+            <h3>What is vibe coding?</h3>
+            <p class="muted">[put a 1-sentence definition here]</p>
+            <p>Examples of vibe coding:</p>
+            <ul class="list">
+              <li>[give 3 examples of what people are using vibe coding for these days]</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Before we start…</h3>
+            <p>Click to pop out this guide to a separate window. <em>Note:</em> Browsers restrict some window controls; we’ll do the best possible.</p>
+            <div class="button-row">
+              <button class="btn" id="btnIntroPop"><span>🪟</span>Pop out this guide</button>
+              <button class="btn secondary" id="btnMakeBig"><span>🧭</span>Make this big again</button>
+            </div>
+            <p class="muted">A floating pop-out button is available at the bottom-left anytime.</p>
+          </div>
+        </div> -->
+      </section>
+
+      <section class="card" data-title="# Let's start with an example - Kirkpatrick Levels">
+        <h2>Let's start with an example - Kirkpatrick Levels</h2>
+        <p></p>
+        <hr>
+        <h3>Please complete the following interactive learning activity:</h3>
+        <div class="placeholder">
+          <strong>Activity placeholder</strong>
+          <p>This boxed container will later host the interactive Kirkpatrick drag-and-drop activity code.</p>
+        </div>
+        <p></p>
+        <hr>
+        <h3 class="mt-12">How was this activity created?</h3>
+        <div class="placeholder">
+          <strong>Creation transcript placeholder</strong>
+          <p>This boxed container will later host the chat transcript explaining how the activity was created.</p>
+        </div>
+        <p></p>
+        <hr>
+        <h3 class="mt-12">Discuss the Kirkpatrick activity</h3>
+        <ol class="list">
+          <li>The example Kirkpatrick situations were written by Chat GPT and not checked by the instructor. Are they accurate? Would you change or reclassify any?</li>
+          <li>Was this drag-and-drop format necessary? This could have just been eight multiple choice questions instead.</li>
+          <li>Any other questions or comments?</li>
+        </ol>
+      </section>
+
+      <section class="card" data-title="# Let's make an app together">
+        <h2>Let's make an app together</h2>
+        <p></p>
+        <hr>
+        <h3>Define goals</h3>
+        <p>Let's separate the educational goals from the technological features of the learning app or tool that we make.</p>
+        <div class="grid-1">
+          
+
+          <div>
+            <h4>What are the educational goals of the app?</h4>
+            <ul class="list">
+              <li>Adhere to principles of backward design.</li>
+              <li>Review a specific learning objective in a way that activates retrieval and spaced learning.</li>
+              <li>Enable learner to self-assess and identify areas for improvement with regard to a specific learning objective.</li>
+              <li>What else?</li>
+            </ul>
+            <br>
+
+            <div>
+            <h4>What technological features do we want our app to have?</h4>
+            <p>Required:</p>
+            <ul class="list">
+              <li>Interactive</li>
+              <li>Assess a key skill</li>
+              <li>Provide feedback immediately</li>
+              <li>What else?</li>
+            </ul>
+
+            <p>Optional:</p>
+            <ul class="list">
+              <li>Create a record of results in CSV format, with unique file name (ask user for their name).</li>
+              <li>Make a second app for the teacher that receives the results from the student app.</li>
+            </ul>
+            <br>
+          </div>
+        </div>
+
+
+
+          <!-- <div>
+            <h4>REMOVE</h4>
+            <div class="callout">
+              <p class="mb-8"><strong>Required:</strong></p>
+              <ul class="list">
+                <li>Interactive</li>
+                <li>Assess a key skill</li>
+                <li>Provide feedback immediately</li>
+                <li>What else?</li>
+              </ul>
+              <p class="mb-8"><strong>Optional:</strong></p>
+              <ul class="list">
+                
+              </ul>
+            </div>
+          </div> -->
+        </div>
+
+        <p></p>
+        <hr>
+
+        <h3 class="mt-12">Write a prompt</h3>
+        <p>For this part of the workshop, we need one volunteer to share their screen with the entire group. The volunteer should have this workshop guide and a generative AI chatbot open in a web browser, with sidebar and any other private information hidden.</p>
+        <div class="callout">
+          <p class="mb-8"><strong>Prompt</strong></p>
+          <label class="mb-8" for="topicBox">Topic for the app:</label>
+          <input id="topicBox" type="text" placeholder="e.g., Medication safety basics" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); background:#0b1030; color:var(--text)">
+          <p class="mt-12">Please make a simple educational app that my learners can use that is a) interactive and gamified using HTML and JavaScript (vanilla JavaScript only, so that it can be used without external components and easily embedded in other places) and b) gives the user feedback about right and wrong answers. The app should be about this topic: <span id="promptTopic">[empty text box]</span>.</p>
+          <div class="button-row">
+            <button class="btn" id="btnCopyPrompt"><span>📋</span>Copy prompt</button>
+          </div>
+        </div>
+        <div class="callout mt-12">
+          <p class="mb-8"><strong>Optional follow-up prompts</strong></p>
+          <p>Add a button for learners to download a CSV file with their results and send to their instructor.</p>
+          <div class="button-row"><button class="btn secondary" id="btnCopyFollow"><span>📋</span>Copy follow-up</button></div>
+        </div>
+      </section>
+
+      <section class="card" data-title="# Make a small, interactive app yourself">
+        <h2>Make a small, interactive app yourself</h2>
+        <p>We will do this part of the workshop in Zoom breakout rooms. If you need help with anything, come back to the main Zoom room.</p>
+        <p></p>
+        <hr>
+        <h3>Open a chatbot</h3>
+        <p>Open any chatbot. Here are some options (opens in a new tab):</p>
+        <!-- <div class="button-row">
+          <a href="https://chatgpt.com" target="_blank" class="btn"><span>💬</span>ChatGPT (works without an account)</a>
+          <a href="https://claude.ai" target="_blank" class="btn secondary"><span>🤖</span>Claude (free account)</a>
+          <a href="https://gemini.google.com" target="_blank" class="btn warn"><span>🌟</span>Gemini (Google account)</a>
+        </div> -->
+
+        <div>
+  <a href="https://chatgpt.com" target="_blank" class="btn"><span>💬</span>Click here to open Chat GPT (works without an account; click on "Stay logged out" if you don't have an account)</a><br>
+  <br>
+  <a href="https://claude.ai" target="_blank" class="btn secondary"><span>🤖</span>Click here to open Claude (requires a free account)</a><br>
+  <br>
+  <a href="https://gemini.google.com" target="_blank" class="btn warn"><span>🌟</span>Click here to open Gemini (works with your regular Google/Gmail account if you have one)</a>
+
+</div>
+
+        <!-- <p class="muted mt-12">Should we add more to this list? Consider Perplexity, Mistral, or your institution’s approved tools.</p> -->
+
+        <p></p>
+        <hr>
+
+        <h3 class="mt-12">Give the chatbot a prompt</h3>
+        <p>Use the prompt that we drafted above.</p>
+        <div class="button-row">
+          <button class="btn" id="btnCopyPrompt2"><span>📋</span>Copy prompt again</button>
+        </div>
+
+        <p></p>
+        <hr>
+
+        <h3 class="mt-12">View and test the app</h3>
+        <p>Your chatbot might have an option to preview your app. We are NOT going to use that option. Instead, we'll practice copying the code and running it separately.</p>
+        <p>Look for a copy button in your chatbot (it often looks like these):</p>
+        <div class="button-row">
+          <button class="btn ghost"><span>📄</span>Copy</button>
+          <button class="btn ghost"><span>📄</span>Copy code</button>
+        </div>
+        <p>Once you have copied the code from the chatbot, paste it into an Online HTML Editor (link is below). As the image below shows, delete any code that is already there and then paste in your own new code that you copied from the chatbot.</p>
+        <div class="placeholder mt-12">
+          <!-- <strong>Screenshot placeholder</strong> -->
+          <!-- <p>[insert image <code>IgniteDeleteDefault1.png</code> here later]</p> -->
+           <img src="IgniteDeleteDefault1.png" alt="HTML Editor example image">
+
+
+        </div>
+        <div class="button-row mt-12">
+          <a href="https://tools.igniteagency.com/html-viewer/" target="_blank" class="btn success"><span>🧪</span>Click here to open the Online HTML Editor</a>
+          <button class="btn ghost" id="btnMoreEditors"><span>🆘</span>Click here for additional help</button>
+        </div>
+        <div id="altEditors" class="callout" style="display:none; margin-top:10px">
+          <p class="mb-8">The main HTML Editor we recommend is: <a target="_blank" href="https://tools.igniteagency.com/html-viewer/">https://tools.igniteagency.com/html-viewer/</a></p>
+          <p class="mb-8">If the main editor doesn't work, try:</p>
+          <ul class="list">
+            <li><a target="_blank" href="https://htmledit.squarefree.com/">https://htmledit.squarefree.com/</a></li>
+            <li><a target="_blank" href="https://realtimehtml.com/">https://realtimehtml.com/</a></li>
+          </ul>
+        </div>
+
+        <p></p>
+        <hr>
+
+        <h3 class="mt-12">Download to your own computer</h3>
+        <div class="collapsible" id="moreExpl">
+          <button class="btn ghost" id="btnMoreExpl"><span>ℹ️</span>Show additional explanation</button>
+          <div class="content">
+            <ul class="list">
+              <li>If someone sends you a Microsoft Word document in an email, you would download the attachment and open it in Word. That file type is a <strong>DOCX</strong>. [Make a gif/animation showing this later]</li>
+              <li>Similarly, the app you generated is an <strong>HTML</strong> file. Download it, save it wherever you like, and double‑click to open. It will open in your web browser.</li>
+            </ul>
+            <div class="button-row mt-12"><button class="btn ghost" id="btnHideExpl"><span>🙈</span>Hide additional explanation</button></div>
+          </div>
+        </div>
+        <ol class="list mt-12">
+          <li>Click the <strong>Download</strong> button in the HTML editor (top-right corner in the image above).</li>
+          <li>Go to your Downloads folder (or wherever you saved the file).</li>
+          <li>Open the file (often named <code>index.html</code>).</li>
+        </ol>
+        <p class="muted">You might be able to upload this file to an LMS for learners to use.</p>
+      </section>
+
+      <section class="card" data-title="# Review">
+        <h2>Review</h2>
+        <!-- <h3>What did we do?</h3> -->
+
+        <p></p>
+        <hr>
+        <h3 class="mt-12">What did we do today?</h3>
+        <p>Today, we learned how to make apps that…</p>
+        <ul class="list">
+          <li>can be created and modified using natural language prompts to a generative AI chatbot.</li>
+          <li>address one or more learning objectives.</li>
+          <li>learners can interact with and receive immediate feedback.</li>
+        </ul>
+
+        <!-- <div class="placeholder"><p>[summary of what we did, in bullet points]</p></div> -->
+        <h3 class="mt-12">What did we NOT do today?</h3>
+        <p>Today, we did NOT learn how to make apps that…</p>
+        <ul class="list">
+          <li>remember each user/learner and adapt to their individual progress and needs.</li>
+          <li>follow proper app design and development principles.</li>
+          <li>automatically send user/learner results to the teacher/mentor.</li>
+        </ul>
+      </section>
+
+      <section class="card" data-title="# Knowledge check">
+        <h2>Knowledge check</h2>
+        <p>Please complete the following activity.</p>
+        <div class="quiz" id="quiz">
+          <div class="q" data-answer="b">
+            <div><strong>1.</strong> Which statement best describes “vibe coding”?</div>
+            <div class="choices">
+              <label><input type="radio" name="q1" value="a"> A rigid, fully specified software engineering process</label>
+              <label><input type="radio" name="q1" value="b"> An iterative, conversational way to generate working code quickly using AI</label>
+              <label><input type="radio" name="q1" value="c"> A tool that automatically deploys apps to production</label>
+            </div>
+            <div class="result"></div>
+          </div>
+          <div class="q" data-answer="c">
+            <div><strong>2.</strong> A key risk of vibe‑coded tools is…</div>
+            <div class="choices">
+              <label><input type="radio" name="q2" value="a"> They cannot be interactive</label>
+              <label><input type="radio" name="q2" value="b"> They require paid cloud hosting</label>
+              <label><input type="radio" name="q2" value="c"> They may behave unexpectedly or include inaccuracies</label>
+            </div>
+            <div class="result"></div>
+          </div>
+          <div class="q" data-answer="a">
+            <div><strong>3.</strong> A helpful first step when making an app with AI is to…</div>
+            <div class="choices">
+              <label><input type="radio" name="q3" value="a"> Write a clear prompt that states goals and constraints</label>
+              <label><input type="radio" name="q3" value="b"> Skip prompting and wait for the AI to propose a topic</label>
+              <label><input type="radio" name="q3" value="c"> Install many external libraries</label>
+            </div>
+            <div class="result"></div>
+          </div>
+          <div class="button-row"><button id="btnGrade" class="btn success"><span>✅</span>Check answers</button></div>
+          <p id="score" class="muted"></p>
+        </div>
+      </section>
+
+      <section class="card" data-title="# Discussion">
+        <h2>Discussion</h2>
+        <p></p>
+        <hr>
+        <h3>What questions do you have?</h3>
+        <p>Let's pause to discuss any questions you might have.</p>
+        <!-- <div class="placeholder"><p>[Type or discuss questions here]</p></div> -->
+
+        <p></p>
+        <hr>
+
+        <h3 class="mt-12">What are the risks of vibe coding?</h3>
+        <ul class="list">
+          <li>App could behave unexpectedly</li>
+          <li>Generative AI could misinterpret your instructions.</li>
+          <li>Information might not be accurate</li>
+          <li>What other risks can you think of?</li>
+        </ul>
+
+        <p></p>
+        <hr>
+
+        <h3 class="mt-12">What are the benefits of vibe coding?</h3>
+        <ul class="list">
+          <li>Quickly generate interactive learning tools to teach or reinforce learning objectives.</li>
+          <li>Create advanced and aesthetically pleasing interfaces for learners to use, without writing any code manually.</li>
+          <li>What other benefits can you think of?</li>
+        </ul>
+
+        <p></p>
+        <hr>
+        <h3 class="mt-12">How can I take this to the next level?</h3>
+        <ul class="list">
+          <li>
+            Think bigger and experiment on your own. Example chatbot prompts:
+            <ul class="list">
+              <li><em>I need help making and publishing an interactive app to teach an entire class to my students and assess them.</em></li>
+              <li><em>Make an interactive app that students can use to review emergency department protocols, assess their knowledge, and document their progress over time.</em></li>
+            </ul>
+          </li>
+          <li>Try a dedicated vibe coding platform like Replit, Lovable, or Cursor.</li>
+          <li>Meet with Anshul to add features to your app and make it available to your learners.</li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Floating controls -->
+  <!-- <div class="floating-pop">
+    <button class="btn" id="btnFloatPop"><span>🪟</span>Pop out</button>
+  </div> -->
+  <div class="floating-next">
+    <button class="btn secondary" id="btnPrev"><span>⬅️</span>Prev</button>
+    <button class="btn" id="btnNext"><span>➡️</span>Next</button>
+  </div>
+
+  <script>
+    // ===== Helpers =====
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // ===== Auto-number sections & build TOC =====
+    function autonumber(){
+      const sections = $$('#content section.card');
+      const counters = [0,0,0,0];
+      const toc = $('#toc'); toc.innerHTML = '';
+      sections.forEach((sec, idx) => {
+        const h2 = $('h2', sec);
+        counters[0]++;
+        counters[1]=counters[2]=counters[3]=0;
+        const n = counters[0];
+        h2.dataset.number = n;
+        if(!h2.dataset.original){ h2.dataset.original = h2.textContent; }
+        h2.textContent = `${n}. ${h2.dataset.original}`;
+        sec.id = `s-${n}`;
+        // inject anchors for h3/h4 numbering
+        $$('#content section.card h3, h4', sec).forEach(h => {
+          const level = h.tagName === 'H3' ? 1 : 2;
+          counters[level]++;
+          for(let i=level+1;i<counters.length;i++) counters[i]=0;
+          const label = [n, counters[1]||0, counters[2]||0].slice(0, 1+level).join('.')
+          if(!h.dataset.original){ h.dataset.original = h.textContent; }
+          h.textContent = `${label} ${h.dataset.original}`;
+        });
+        // TOC link
+        const a = document.createElement('a');
+        a.href = `#${sec.id}`;
+        a.innerHTML = `📄 <span>${h2.textContent}</span>`;
+        toc.appendChild(a);
+      });
+    }
+
+    // ===== TOC active sync =====
+    function syncTOC(){
+      const links = $$('#toc a');
+      let current = links[0];
+      links.forEach(a => a.classList.remove('active'));
+      const fromTop = window.scrollY + 120;
+      $$('#content section.card').forEach(sec => {
+        if(sec.offsetTop <= fromTop){ current = $(`#toc a[href="#${sec.id}"]`) || current; }
+      });
+      current?.classList.add('active');
+    }
+
+    // ===== Keyboard Nav =====
+    function gotoSection(delta){
+      const secs = $$('#content section.card');
+      // pick the next based on current scroll
+      let i = secs.findIndex(s => s.getBoundingClientRect().top > 10);
+      if(i === -1) i = secs.length; // at bottom
+      const currentIndex = Math.max(0, i-1);
+      let next = currentIndex + delta;
+      next = Math.min(Math.max(next, 0), secs.length-1);
+      secs[next].scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    // ===== Buttons, toggles, copies =====
+    function setUpUI(){
+      $('#btnBackToTop').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+      $('#btnPrev').addEventListener('click', ()=> gotoSection(-1));
+      $('#btnNext').addEventListener('click', ()=> gotoSection(+1));
+      $('#btnToggleOutline').addEventListener('click', ()=> $('#sidebar').classList.toggle('open'));
+      $('#btnMoreEditors').addEventListener('click', ()=> $('#altEditors').style.display = $('#altEditors').style.display==='none'?'block':'none');
+
+      const topicBox = $('#topicBox');
+      const promptTopic = $('#promptTopic');
+      topicBox.addEventListener('input', ()=>{ promptTopic.textContent = topicBox.value || '[empty text box]'; });
+
+      const mainPrompt = () => `Please make a simple educational app that my learners can use that is a) interactive and gamified using HTML and JavaScript (vanilla JavaScript only, so that it can be used without external components and easily embedded in other places) and b) gives the user feedback about right and wrong answers. The app should be about this topic: ${topicBox.value || '[empty text box]'}.`;
+      const followPrompt = `Add a button for learners to download a CSV file with their results and send to their instructor.`;
+
+      const doCopy = async (text) => {
+        try{ await navigator.clipboard.writeText(text); alert('Copied to clipboard!'); }catch(e){
+          // fallback
+          const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('Copied to clipboard.');
+        }
+      };
+      $('#btnCopyPrompt').addEventListener('click', ()=> doCopy(mainPrompt()));
+      $('#btnCopyPrompt2').addEventListener('click', ()=> doCopy(mainPrompt()));
+      $('#btnCopyFollow').addEventListener('click', ()=> doCopy(followPrompt));
+
+      // Collapsible
+      $('#btnMoreExpl').addEventListener('click', ()=> $('#moreExpl').classList.add('open'));
+      $('#btnHideExpl').addEventListener('click', ()=> $('#moreExpl').classList.remove('open'));
+
+
+      // Pop-out buttons (safe if elements are missing)
+// const introPop = $('#btnIntroPop');
+// if (introPop) introPop.addEventListener('click', popOutWindow);
+
+// const popOut = $('#btnPopOut');
+// if (popOut) popOut.addEventListener('click', popOutWindow);
+
+// const floatPop = $('#btnFloatPop');
+// if (floatPop) floatPop.addEventListener('click', popOutWindow);
+
+// const makeBig = $('#btnMakeBig');
+// if (makeBig) {
+//   makeBig.addEventListener('click', () => {
+//     if (window.opener && !window.opener.closed) { window.close(); window.opener.focus(); }
+//     else { window.scrollTo({top:0,behavior:'smooth'}); alert('If this tab is already in a normal window, you are all set.'); }
+//   });
+// }
+
+
+      // Quiz grading
+      $('#btnGrade').addEventListener('click', ()=>{
+        let correct=0; let total=0;
+        $$('#quiz .q').forEach((q,idx)=>{
+          total++;
+          const ans = q.dataset.answer;
+          const picked = q.querySelector('input:checked')?.value;
+          const result = $('.result', q);
+          if(picked===ans){ correct++; result.textContent='✅ Correct'; result.style.color = '#4caf50'; }
+          else{ result.textContent = '❌ Not quite'; result.style.color = '#ff5370'; }
+        });
+        $('#score').textContent = `You answered ${correct} / ${total} correctly.`;
+      });
+
+      // Keyboard J/K
+      document.addEventListener('keydown', (e)=>{
+        if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        if(e.key.toLowerCase()==='j'){ gotoSection(+1); }
+        if(e.key.toLowerCase()==='k'){ gotoSection(-1); }
+      });
+    }
+
+    // ===== Pop-out logic (best-effort due to browser restrictions) =====
+    // function popOutWindow(){
+    //   const w = Math.max(500, Math.floor(window.screen.availWidth/3));
+    //   const h = window.screen.availHeight - 80;
+    //   const features = `popup=yes,noopener=yes,resizable=yes,scrollbars=yes,width=${w},height=${h},left=0,top=0`;
+    //   const url = new URL(window.location.href);
+    //   url.searchParams.set('popout','1');
+    //   const win = window.open(url.toString(), '_blank', features);
+    //   if(!win){ alert('Popup blocked by the browser. Please allow popups for this site and try again.'); return; }
+    //   try{ win.focus(); }catch{}
+    // }
+
+    // If in popout, attempt slight UI tweaks
+    // function applyPopoutMode(){
+    //   const params = new URLSearchParams(window.location.search);
+    //   if(params.get('popout')==='1'){
+    //     document.body.classList.add('popout');
+    //     // Collapse sidebar by default on small screens
+    //     $('#sidebar')?.classList.remove('open');
+    //   }
+    // }
+
+    // ===== Init =====
+    autonumber();
+    setUpUI();
+    // applyPopoutMode();
+    syncTOC();
+    document.addEventListener('scroll', syncTOC);
+  </script>
+</body>
+</html>
