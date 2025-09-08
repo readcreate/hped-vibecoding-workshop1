@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirkpatrick Levels Knowledge Check</title>
+<style>
+  body { font-family: sans-serif; background: #f9fafb; margin: 0; padding: 20px; }
+  h1, h2 { margin: 0 0 8px 0; }
+  .intro { margin-bottom: 24px; padding: 16px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 8px; text-align: left; color: #111827; position: relative; }
+  .intro button { position: absolute; top: 8px; right: 8px; border: none; background: transparent; font-size: 16px; cursor: pointer; }
+  .show-info-btn { margin-bottom: 16px; padding: 8px 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .scroll-container { max-height: 70vh; overflow-y: auto; padding-right: 8px; }
+  .draggable { padding: 8px; margin: 4px; background: #f3f4f6; border-radius: 8px; cursor: grab; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .droppable { min-height: 80px; padding: 8px; margin: 8px 0; border: 2px dashed #9ca3af; border-radius: 12px; background: #f9fafb; text-align: center; }
+  .droppable.correct { border-color: #16a34a; }
+  .droppable.wrong { border-color: #dc2626; }
+  .popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #dc2626; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: none; z-index: 1000; }
+</style>
+</head>
+<body>
+
+<h1 style="text-align:center;">Kirkpatrick Levels Knowledge Check</h1>
+
+<div id="introBox" class="intro">
+  <button id="closeIntro">&times;</button>
+  <h2>What are the Kirkpatrick levels and how are they useful in health professions education?</h2>
+  <p>The Kirkpatrick model provides a structured way to evaluate training effectiveness at four levels: reaction, learning, behavior, and results. In healthcare education, it helps connect training experiences to meaningful outcomes like improved knowledge, skill application in the workplace, and better patient care.</p>
+</div>
+
+<button id="showIntro" class="show-info-btn" style="display:none;">Show Info</button>
+
+<div class="grid">
+  <div class="scroll-container">
+    <h2>Drag These Situations</h2>
+    <div id="itemsContainer"></div>
+  </div>
+  <div class="scroll-container">
+    <h2>Drop Into Correct Level</h2>
+    <div id="reaction" class="droppable">Level 1: Reaction</div>
+    <div id="learning" class="droppable">Level 2: Learning</div>
+    <div id="behavior" class="droppable">Level 3: Behavior</div>
+    <div id="results" class="droppable">Level 4: Results</div>
+  </div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script>
+const itemsData = [
+  {id:"smileSheets", label:"Nurses rated the training as engaging and relevant.", correct:"reaction"},
+  {id:"confidence", label:"Participants felt more confident after the session.", correct:"reaction"},
+  {id:"exam", label:"Residents scored higher on a post-training exam.", correct:"learning"},
+  {id:"simulation", label:"Doctors successfully performed new skills in a simulation.", correct:"learning"},
+  {id:"workflow", label:"Nurses consistently use the new electronic health record features.", correct:"behavior"},
+  {id:"mentorFeedback", label:"Supervisors observed staff applying new communication strategies.", correct:"behavior"},
+  {id:"patientSafety", label:"Patient safety incident rates decreased after training.", correct:"results"},
+  {id:"costReduction", label:"Hospital reduced costs due to fewer medication errors.", correct:"results"}
+];
+
+function shuffleArray(array) {
+  return array.map(a => [Math.random(), a]).sort((a,b) => a[0]-b[0]).map(a=>a[1]);
+}
+
+const itemsContainer = document.getElementById('itemsContainer');
+let items = shuffleArray(itemsData);
+
+function renderItems() {
+  itemsContainer.innerHTML = '';
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'draggable';
+    div.draggable = true;
+    div.id = item.id;
+    div.textContent = item.label;
+    div.addEventListener('dragstart', dragStart);
+    itemsContainer.appendChild(div);
+  });
+}
+
+let draggedItemId = null;
+
+function dragStart(e) {
+  draggedItemId = e.target.id;
+  e.dataTransfer.setData('text/plain', draggedItemId);
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+// Popup function
+function showPopup(message) {
+  const popup = document.getElementById('popup');
+  popup.textContent = message;
+  popup.style.display = 'block';
+  setTimeout(()=>{ popup.style.display = 'none'; }, 4500); // 3x longer
+}
+
+// Add droppable listeners
+document.querySelectorAll('.droppable').forEach(d => {
+  d.addEventListener('dragover', e => e.preventDefault());
+  d.addEventListener('drop', e => {
+    e.preventDefault();
+    const dropId = e.currentTarget.id;
+    const item = items.find(i => i.id === draggedItemId);
+    if(!item) return;
+
+    if(item.correct === dropId){
+      e.currentTarget.classList.remove('wrong');
+      e.currentTarget.classList.add('correct');
+      const p = document.createElement('div');
+      p.textContent = item.label;
+      p.style.marginTop='2px';
+      p.style.fontWeight='500';
+      e.currentTarget.appendChild(p);
+      items = items.filter(i=>i.id!==draggedItemId);
+      renderItems();
+    } else {
+      e.currentTarget.classList.remove('correct');
+      e.currentTarget.classList.add('wrong');
+      showPopup(`${item.label} — try again!`);
+    }
+  });
+});
+
+renderItems();
+
+// Dismissable intro box
+const introBox = document.getElementById('introBox');
+const closeIntro = document.getElementById('closeIntro');
+const showIntro = document.getElementById('showIntro');
+
+closeIntro.addEventListener('click', () => {
+  introBox.style.display = 'none';
+  showIntro.style.display = 'inline-block';
+});
+
+showIntro.addEventListener('click', () => {
+  introBox.style.display = 'block';
+  showIntro.style.display = 'none';
+});
+</script>
+
+</body>
+</html>
