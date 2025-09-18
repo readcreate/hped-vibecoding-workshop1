@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Clinical Reflection Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            position: relative;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Mood Tracker */
+        .mood-tracker {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .day-mood {
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .day-mood:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .day-mood.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .mood-emoji {
+            font-size: 2.5em;
+            margin: 10px 0;
+            filter: grayscale(100%);
+            transition: filter 0.3s;
+        }
+
+        .day-mood.selected .mood-emoji {
+            filter: grayscale(0%);
+        }
+
+        /* Skills Radar */
+        .skills-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        #skillsCanvas {
+            cursor: pointer;
+        }
+
+        /* Challenge Cards */
+        .challenge-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .challenge-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            z-index: 0;
+        }
+
+        .challenge-card.selected::before {
+            width: 100%;
+        }
+
+        .challenge-card.selected {
+            color: white;
+        }
+
+        .challenge-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .challenge-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        /* Learning Moments */
+        .moment-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .moment-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .moment-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-moment-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.3s;
+        }
+
+        .add-moment-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .moments-timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .moment-item {
+            position: relative;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .moment-item::before {
+            content: '💡';
+            position: absolute;
+            left: -30px;
+            top: 15px;
+            font-size: 1.5em;
+        }
+
+        .moment-delete {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Patient Impact Slider */
+        .impact-slider {
+            margin: 30px 0;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .slider-track {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .slider-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #26de81);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .slider-handle {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .slider-handle:active {
+            cursor: grabbing;
+        }
+
+        .impact-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 0 30px;
+        }
+
+        /* Export Button */
+        .export-section {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .export-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #26de81, #00d2d3);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(38, 222, 129, 0.3);
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(38, 222, 129, 0.4);
+        }
+
+        .completion-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            border-radius: 15px;
+            margin-top: 30px;
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Weekly Reflection Journey</h1>
+        <p class="subtitle">Take a moment to reflect on your clinical experiences this week</p>
+
+        <!-- Mood Tracker Section -->
+        <div class="section" style="animation-delay: 0.1s">
+            <h2 class="section-title">
+                <span>😊</span>
+                <span>How did each day feel?</span>
+            </h2>
+            <div class="mood-tracker" id="moodTracker">
+                <div class="day-mood" data-day="Monday" data-mood="">
+                    <div class="day-name">Monday</div>
+                    <div class="mood-emoji">😐</div>
+                </div>
+                <div class="day-mood" data-day="Tuesday" data-mood="">
+                    <div class="day-name">Tuesday</div>
+                    <div class="mood-emoji">😐</div>
+                </div>
+                <div class="day-mood" data-day="Wednesday" data-mood="">
+                    <div class="day-name">Wednesday</div>
+                    <div class="mood-emoji">😐</div>
+                </div>
+                <div class="day-mood" data-day="Thursday" data-mood="">
+                    <div class="day-name">Thursday</div>
+                    <div class="mood-emoji">😐</div>
+                </div>
+                <div class="day-mood" data-day="Friday" data-mood="">
+                    <div class="day-name">Friday</div>
+                    <div class="mood-emoji">😐</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Radar Section -->
+        <div class="section" style="animation-delay: 0.2s">
+            <h2 class="section-title">
+                <span>📊</span>
+                <span>Skills Development Radar</span>
+            </h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Click and drag points to rate your progress (0-10)</p>
+            <div class="skills-container">
+                <canvas id="skillsCanvas" width="400" height="400"></canvas>
+            </div>
+        </div>
+
+        <!-- Challenge Cards Section -->
+        <div class="section" style="animation-delay: 0.3s">
+            <h2 class="section-title">
+                <span>🎯</span>
+                <span>Challenges Faced</span>
+            </h2>
+            <div class="challenge-cards" id="challengeCards">
+                <div class="challenge-card" data-challenge="Time Management">
+                    <div class="challenge-icon">⏰</div>
+                    <div class="challenge-text">Time Management</div>
+                </div>
+                <div class="challenge-card" data-challenge="Difficult Diagnosis">
+                    <div class="challenge-icon">🔍</div>
+                    <div class="challenge-text">Difficult Diagnosis</div>
+                </div>
+                <div class="challenge-card" data-challenge="Communication">
+                    <div class="challenge-icon">💬</div>
+                    <div class="challenge-text">Communication</div>
+                </div>
+                <div class="challenge-card" data-challenge="Procedure Skills">
+                    <div class="challenge-icon">💉</div>
+                    <div class="challenge-text">Procedure Skills</div>
+                </div>
+                <div class="challenge-card" data-challenge="Emotional Stress">
+                    <div class="challenge-icon">😔</div>
+                    <div class="challenge-text">Emotional Stress</div>
+                </div>
+                <div class="challenge-card" data-challenge="Team Dynamics">
+                    <div class="challenge-icon">👥</div>
+                    <div class="challenge-text">Team Dynamics</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Moments Section -->
+        <div class="section" style="animation-delay: 0.4s">
+            <h2 class="section-title">
+                <span>💡</span>
+                <span>Key Learning Moments</span>
+            </h2>
+            <div class="moment-input">
+                <input type="text" id="momentInput" placeholder="Describe a significant learning moment...">
+                <button class="add-moment-btn" onclick="addMoment()">Add Moment</button>
+            </div>
+            <div class="moments-timeline" id="momentsTimeline"></div>
+        </div>
+
+        <!-- Patient Impact Slider -->
+        <div class="section" style="animation-delay: 0.5s">
+            <h2 class="section-title">
+                <span>❤️</span>
+                <span>Patient Impact Assessment</span>
+            </h2>
+            <p style="color: #666; margin-bottom: 20px;">How much positive impact did you have on patient care this week?</p>
+            <div class="impact-slider">
+                <div class="slider-container" id="sliderContainer">
+                    <div class="slider-track">
+                        <div class="slider-fill" id="sliderFill" style="width: 50%"></div>
+                        <div class="slider-handle" id="sliderHandle" style="left: 50%">🏥</div>
+                    </div>
+                </div>
+                <div class="impact-labels">
+                    <span>Minimal</span>
+                    <span>Moderate</span>
+                    <span>Significant</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="export-section">
+            <button class="export-btn" onclick="exportToCSV()">📥 Export Reflection as CSV</button>
+        </div>
+
+        <div class="completion-message" id="completionMessage">
+            🎉 Great job completing your reflection! Keep growing and learning!
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let reflectionData = {
+            date: new Date().toISOString().split('T')[0],
+            moods: {},
+            skills: {
+                'Clinical Knowledge': 5,
+                'Patient Care': 5,
+                'Communication': 5,
+                'Teamwork': 5,
+                'Problem Solving': 5,
+                'Professionalism': 5
+            },
+            challenges: [],
+            learningMoments: [],
+            patientImpact: 50
+        };
+
+        // Mood Tracker
+        const moodEmojis = ['😔', '😕', '😐', '😊', '😄'];
+        let currentMoodIndex = 2;
+
+        document.querySelectorAll('.day-mood').forEach(day => {
+            day.addEventListener('click', function() {
+                const currentEmoji = this.querySelector('.mood-emoji');
+                const currentIndex = moodEmojis.indexOf(currentEmoji.textContent);
+                const nextIndex = (currentIndex + 1) % moodEmojis.length;
+                currentEmoji.textContent = moodEmojis[nextIndex];
+                
+                this.classList.add('selected');
+                reflectionData.moods[this.dataset.day] = moodEmojis[nextIndex];
+                
+                // Animate the selection
+                this.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+
+        // Skills Radar Chart
+        const canvas = document.getElementById('skillsCanvas');
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 150;
+
+        function drawRadar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 5; i++) {
+                ctx.beginPath();
+                for (let j = 0; j < 6; j++) {
+                    const angle = (Math.PI * 2 / 6) * j - Math.PI / 2;
+                    const x = centerX + Math.cos(angle) * (radius * i / 5);
+                    const y = centerY + Math.sin(angle) * (radius * i / 5);
+                    if (j === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            // Draw axes
+            const skills = Object.keys(reflectionData.skills);
+            skills.forEach((skill, index) => {
+                const angle = (Math.PI * 2 / 6) * index - Math.PI / 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(
+                    centerX + Math.cos(angle) * radius,
+                    centerY + Math.sin(angle) * radius
+                );
+                ctx.stroke();
+                
+                // Draw labels
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#333';
+                const labelX = centerX + Math.cos(angle) * (radius + 20);
+                const labelY = centerY + Math.sin(angle) * (radius + 20);
+                ctx.textAlign = 'center';
+                ctx.fillText(skill, labelX, labelY);
+            });
+
+            // Draw data
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            skills.forEach((skill, index) => {
+                const angle = (Math.PI * 2 / 6) * index - Math.PI / 2;
+                const value = reflectionData.skills[skill];
+                const x = centerX + Math.cos(angle) * (radius * value / 10);
+                const y = centerY + Math.sin(angle) * (radius * value / 10);
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw points
+            skills.forEach((skill, index) => {
+                const angle = (Math.PI * 2 / 6) * index - Math.PI / 2;
+                const value = reflectionData.skills[skill];
+                const x = centerX + Math.cos(angle) * (radius * value / 10);
+                const y = centerY + Math.sin(angle) * (radius * value / 10);
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#667eea';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        // Make radar interactive
+        let isDragging = false;
+        let draggedSkill = null;
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const skills = Object.keys(reflectionData.skills);
+            skills.forEach((skill, index) => {
+                const angle = (Math.PI * 2 / 6) * index - Math.PI / 2;
+                const value = reflectionData.skills[skill];
+                const pointX = centerX + Math.cos(angle) * (radius * value / 10);
+                const pointY = centerY + Math.sin(angle) * (radius * value / 10);
+                
+                const distance = Math.sqrt((x - pointX) ** 2 + (y - pointY) ** 2);
+                if (distance < 10) {
+                    isDragging = true;
+                    draggedSkill = skill;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && draggedSkill) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                const value = Math.min(10, Math.max(0, (distance / radius) * 10));
+                reflectionData.skills[draggedSkill] = Math.round(value);
+                drawRadar();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggedSkill = null;
+            canvas.style.cursor = 'pointer';
+        });
+
+        // Challenge Cards
+        document.querySelectorAll('.challenge-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const challenge = this.dataset.challenge;
+                
+                if (this.classList.contains('selected')) {
+                    if (!reflectionData.challenges.includes(challenge)) {
+                        reflectionData.challenges.push(challenge);
+                    }
+                } else {
+                    const index = reflectionData.challenges.indexOf(challenge);
+                    if (index > -1) {
+                        reflectionData.challenges.splice(index, 1);
+                    }
+                }
+            });
+        });
+
+        // Learning Moments
+        function addMoment() {
+            const input = document.getElementById('momentInput');
+            const moment = input.value.trim();
+            
+            if (moment) {
+                reflectionData.learningMoments.push(moment);
+                
+                const timeline = document.getElementById('momentsTimeline');
+                const momentDiv = document.createElement('div');
+                momentDiv.className = 'moment-item';
+                momentDiv.innerHTML = `
+                    ${moment}
+                    <button class="moment-delete" onclick="deleteMoment(this, '${moment}')">×</button>
+                `;
+                timeline.appendChild(momentDiv);
+                
+                input.value = '';
+            }
+        }
+
+        function deleteMoment(button, moment) {
+            const index = reflectionData.learningMoments.indexOf(moment);
+            if (index > -1) {
+                reflectionData.learningMoments.splice(index, 1);
+            }
+            button.parentElement.remove();
+        }
+
+        // Patient Impact Slider
+        const sliderContainer = document.getElementById('sliderContainer');
+        const sliderHandle = document.getElementById('sliderHandle');
+        const sliderFill = document.getElementById('sliderFill');
+        let isSliding = false;
+
+        sliderHandle.addEventListener('mousedown', () => {
+            isSliding = true;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isSliding) {
+                const rect = sliderContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = Math.min(100, Math.max(0, (x / rect.width) * 100));
+                
+                sliderHandle.style.left = percentage + '%';
+                sliderFill.style.width = percentage + '%';
+                reflectionData.patientImpact = Math.round(percentage);
+                
+                // Update emoji based on value
+                if (percentage < 33) sliderHandle.textContent = '😕';
+                else if (percentage < 66) sliderHandle.textContent = '🏥';
+                else sliderHandle.textContent = '🌟';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isSliding = false;
+        });
+
+        // Export to CSV
+        function exportToCSV() {
+            let csvContent = "Category,Details\n";
+            csvContent += `Date,${reflectionData.date}\n\n`;
+            
+            csvContent += "Daily Moods\n";
+            Object.entries(reflectionData.moods).forEach(([day, mood]) => {
+                csvContent += `${day},${mood}\n`;
+            });
+            
+            csvContent += "\nSkills Assessment (out of 10)\n";
+            Object.entries(reflectionData.skills).forEach(([skill, value]) => {
+                csvContent += `${skill},${value}\n`;
+            });
+            
+            csvContent += "\nChallenges Faced\n";
+            reflectionData.challenges.forEach(challenge => {
+                csvContent += `Challenge,${challenge}\n`;
+            });
+            
+            csvContent += "\nLearning Moments\n";
+            reflectionData.learningMoments.forEach((moment, index) => {
+                csvContent += `Moment ${index + 1},"${moment}"\n`;
+            });
+            
+            csvContent += `\nPatient Impact Score,${reflectionData.patientImpact}%\n`;
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clinical_reflection_${reflectionData.date}.csv`;
+            a.click();
+            
+            // Show completion message
+            document.getElementById('completionMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('completionMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize
+        drawRadar();
+
+        // Add enter key support for learning moments
+        document.getElementById('momentInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addMoment();
+            }
+        });
+    </script>
+</body>
+</html>

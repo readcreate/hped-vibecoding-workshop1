@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>End-of-Rotation Trainee Reflection (Interactive)</title>
+<style>
+  :root{
+    --bg:#0f1226; --panel:#15193b; --panel-2:#1b2050; --text:#f7f7ff; --muted:#cfd3ff;
+    --brand:#7c4dff; --brand-2:#00e5ff; --accent:#4caf50; --danger:#ff5370; --shadow:0 10px 30px rgba(0,0,0,.35);
+    --radius:18px; --radius-sm:12px; --border:rgba(255,255,255,0.12);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:24px; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #1c214d 0%, #0f1226 40%), var(--bg);
+    color:var(--text);
+  }
+  header{
+    max-width:1000px; margin:0 auto 20px; padding:16px 18px; background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)
+  }
+  h1{margin:0 0 6px; font-weight:800; letter-spacing:.3px}
+  p.lead{margin:.25rem 0 0; color:var(--muted); font-size:.95rem}
+  .container{max-width:1000px; margin:0 auto; display:grid; gap:18px}
+  section{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)
+  }
+  section h2{margin:0 0 12px; font-size:1.15rem; letter-spacing:.2px}
+  .subtle{color:var(--muted); font-size:.92rem; margin-top:4px}
+  /* SLIDERS */
+  .slider-row{
+    display:grid; grid-template-columns: 170px 1fr 60px 40px; gap:12px; align-items:center;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; margin:10px 0;
+  }
+  .slider-row label{font-weight:600}
+  .meter-wrap{position:relative}
+  input[type="range"]{
+    width:100%; appearance:none; height:10px; border-radius:999px; background:#2a2f66; outline:none; margin:0;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    appearance:none; width:22px; height:22px; border-radius:50%; background:linear-gradient(180deg,#fff,#ddd);
+    border:2px solid #7c8cff; box-shadow:0 0 0 4px rgba(124,141,255,.18); cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:22px; height:22px; border:none; border-radius:50%; background:#fff; cursor:pointer;
+  }
+  .value{font-variant-numeric:tabular-nums; text-align:right}
+  .emoji{font-size:1.35rem; text-align:center}
+  .scale-bands{
+    position:absolute; inset:0; border-radius:999px; overflow:hidden; pointer-events:none;
+    background: linear-gradient(90deg,#ff616e 0%, #ff9d6b 25%, #ffd56b 50%, #b2f07f 75%, #6eedc7 100%);
+    opacity:.25;
+  }
+  /* DRAG & RANK */
+  .pill{
+    background:rgba(255,255,255,0.05); border:1px dashed rgba(255,255,255,0.25); border-radius:14px; padding:10px 12px; font-weight:600;
+    display:flex; align-items:center; gap:10px; cursor:grab; user-select:none; transition:transform .08s ease;
+  }
+  .pill:active{cursor:grabbing; transform:scale(.99)}
+  .pill .drag{opacity:.7}
+  .rank-wrap{display:grid; gap:10px}
+  .rank-row{
+    display:grid; grid-template-columns: 48px 1fr; gap:10px; align-items:center;
+  }
+  .index{
+    width:48px; height:48px; border-radius:12px; display:grid; place-items:center; font-weight:800;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border);
+  }
+  .bucket{
+    min-height:54px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,0.04);
+    display:flex; align-items:center; padding:6px; overflow:hidden;
+  }
+  .bucket.empty::after{
+    content:"Drag an item here"; color:#9aa2ff; opacity:.7; font-size:.9rem; margin-left:8px;
+  }
+  .pool{
+    display:flex; flex-wrap:wrap; gap:8px; padding:8px; border-radius:14px; border:1px dashed rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.04);
+  }
+  /* Buttons */
+  .actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+  button{
+    appearance:none; border:none; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer;
+    background:linear-gradient(180deg,var(--brand),#5e3bd8); color:white; box-shadow:0 6px 18px rgba(124,77,255,.35);
+  }
+  button.secondary{background:linear-gradient(180deg,#39407d,#2a2f66)}
+  button.warn{background:linear-gradient(180deg,#ff6b81,#e14b64)}
+  .small{font-size:.9rem; opacity:.85}
+  /* Responsive */
+  @media (max-width:700px){
+    .slider-row{grid-template-columns: 130px 1fr 50px 40px}
+    .index{width:40px; height:40px}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>End-of-Rotation Trainee Reflection</h1>
+    <p class="lead">Complete these two interactive sections. Your inputs autosave locally until you export.</p>
+  </header>
+
+  <div class="container">
+    <!-- SECTION 1: SLIDERS -->
+    <section id="sliders">
+      <h2>1) Overall Experience (move sliders; emoji reacts)</h2>
+      <div class="subtle">Rate your month on these dimensions (0 = low / 10 = high).</div>
+      <div id="sliderList"></div>
+      <div class="actions">
+        <button class="secondary" id="resetSliders">Reset sliders</button>
+      </div>
+    </section>
+
+    <!-- SECTION 2: DRAG & RANK -->
+    <section id="rank">
+      <h2>2) What mattered most this month? (drag to rank)</h2>
+      <div class="subtle">Drag cards into the ranked slots from most impactful (1) to least (5). You can also reorder within the list.</div>
+
+      <div class="pool" id="pool" aria-label="Available items" role="listbox"></div>
+
+      <div class="rank-wrap" id="rankWrap" aria-label="Ranked list">
+        <!-- rows injected by JS -->
+      </div>
+
+      <div class="actions">
+        <button class="secondary" id="shufflePool">Shuffle items</button>
+        <button class="secondary" id="clearRanks">Clear ranks</button>
+        <button class="secondary" id="addCustom">+ Add custom factor</button>
+      </div>
+    </section>
+
+    <!-- EXPORT / RESET -->
+    <section>
+      <h2>Save / Export</h2>
+      <div class="subtle">Nothing leaves your device until you export. Use JSON for full structure or CSV for spreadsheets.</div>
+      <div class="actions">
+        <button id="exportJSON">Export JSON</button>
+        <button id="exportCSV">Export CSV</button>
+        <button class="warn" id="resetAll">Reset all & clear autosave</button>
+      </div>
+      <p class="small subtle" id="status"></p>
+    </section>
+  </div>
+
+<script>
+/* -----------------------------
+   CONFIG
+----------------------------- */
+const SLIDER_ITEMS = [
+  { key:'confidence', label:'Confidence in clinical skills' },
+  { key:'belonging',  label:'Sense of belonging on team'   },
+  { key:'prepared',   label:'Preparedness for next stage'  },
+  { key:'stress',     label:'Stress level (reverse-coded)*', reverse:true }
+];
+// Drag & Rank starting cards:
+const DEFAULT_FACTORS = [
+  "Patient interactions",
+  "Learning from supervisors",
+  "Team collaboration",
+  "Autonomy & responsibility",
+  "Work-life balance"
+];
+// How many ranked slots?
+const RANK_SLOTS = 5;
+// Local storage key
+const SAVE_KEY = "eor_trainee_tool_v1";
+
+/* -----------------------------
+   UTILITIES
+----------------------------- */
+const $ = sel => document.querySelector(sel);
+const el = (tag, attrs={}, ...children)=>{
+  const node = document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='class') node.className=v;
+    else if(k==='text') node.textContent=v;
+    else if(k.startsWith('on') && typeof v==='function') node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k,v);
+  });
+  children.forEach(c=> node.appendChild(typeof c==='string'? document.createTextNode(c): c));
+  return node;
+};
+function download(filename, content, type="application/json"){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = el('a', {href:url, download:filename});
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function status(msg){ const s=$("#status"); s.textContent=msg; }
+
+/* -----------------------------
+   AUTOSAVE
+----------------------------- */
+function saveState(state){
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+
+/* -----------------------------
+   SECTION 1: SLIDERS
+----------------------------- */
+const sliderList = $("#sliderList");
+function emojiFor(value){
+  const v = Number(value);
+  if (v <= 2) return "😟";
+  if (v <= 4) return "😕";
+  if (v <= 6) return "🙂";
+  if (v <= 8) return "😄";
+  return "🤩";
+}
+function buildSliders(state){
+  sliderList.innerHTML = "";
+  SLIDER_ITEMS.forEach(item=>{
+    const val = (state.sliders?.[item.key] ?? 5);
+    const row = el('div', {class:'slider-row'});
+    const lbl = el('label', {for:`rng_${item.key}`}, item.label);
+    const wrap = el('div', {class:'meter-wrap'});
+    const range = el('input', {type:'range', min:'0', max:'10', step:'1', id:`rng_${item.key}`, value:String(val), 'aria-label':item.label});
+    const bands = el('div', {class:'scale-bands'});
+    wrap.append(range, bands);
+    const value = el('div', {class:'value', id:`val_${item.key}`, text:String(val)});
+    const emo = el('div', {class:'emoji', id:`emo_${item.key}`, text:emojiFor(val)});
+
+    range.addEventListener('input', ()=>{
+      const v = Number(range.value);
+      value.textContent = String(v);
+      emo.textContent = emojiFor(v);
+      state.sliders[item.key] = v;
+      saveState(state);
+    });
+
+    row.append(lbl, wrap, value, emo);
+    sliderList.appendChild(row);
+  });
+
+  // reverse-coded note if present
+  const hasReverse = SLIDER_ITEMS.some(i=>i.reverse);
+  if (hasReverse && !$('#reverseNote')) {
+    sliderList.appendChild(el('div',{id:'reverseNote', class:'subtle', style:'margin-top:8px;'},
+      '*Higher = more stress for this one (reverse-coded).'
+    ));
+  }
+}
+
+/* -----------------------------
+   SECTION 2: DRAG & RANK
+----------------------------- */
+const pool = $("#pool");
+const rankWrap = $("#rankWrap");
+
+function buildRankSlots(state){
+  rankWrap.innerHTML = "";
+  for(let i=0;i<RANK_SLOTS;i++){
+    const row = el('div',{class:'rank-row'});
+    const index = el('div',{class:'index'}, String(i+1));
+    const bucket = el('div',{
+      class:'bucket empty',
+      'data-slot':String(i),
+      ondragover:(e)=>{ e.preventDefault(); bucket.style.outline='2px dashed #8ea0ff'; },
+      ondragleave:()=>{ bucket.style.outline=''; },
+      ondrop:(e)=>{
+        e.preventDefault(); bucket.style.outline='';
+        const id = e.dataTransfer.getData('text/plain');
+        const card = document.getElementById(id);
+        if (!card) return;
+        // If bucket already has a card, move it back to pool
+        const existing = bucket.querySelector('.pill');
+        if (existing) pool.appendChild(existing);
+        bucket.innerHTML = ""; bucket.classList.remove('empty');
+        bucket.appendChild(card);
+        persistRanking(state);
+      }
+    });
+    row.append(index, bucket);
+    rankWrap.appendChild(row);
+  }
+}
+
+function makeCard(text, id){
+  const pill = el('div', {class:'pill', draggable:'true', id});
+  pill.append(
+    el('span',{class:'drag', 'aria-hidden':'true'}, '⠿'),
+    el('span',{}, text)
+  );
+  pill.addEventListener('dragstart', (e)=>{
+    e.dataTransfer.setData('text/plain', id);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  // Allow reordering within pool via dragover
+  pill.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+  return pill;
+}
+
+function buildPool(state){
+  pool.innerHTML = "";
+  const items = state.poolItems && state.poolItems.length ? state.poolItems : DEFAULT_FACTORS.slice();
+  items.forEach((t, idx)=>{
+    const id = 'card_' + btoa(unescape(encodeURIComponent(t))).replace(/=+$/,'').slice(0,10) + '_' + idx;
+    const card = makeCard(t, id);
+    pool.appendChild(card);
+  });
+}
+
+function persistRanking(state){
+  const ranking = [];
+  const usedIds = new Set();
+  rankWrap.querySelectorAll('.bucket').forEach(bucket=>{
+    const card = bucket.querySelector('.pill');
+    if (card){
+      const text = card.textContent.replace('⠿','').trim();
+      ranking.push(text);
+      usedIds.add(card.id);
+    } else {
+      ranking.push(null);
+    }
+  });
+  state.ranking = ranking;
+
+  // rebuild poolItems from remaining cards in pool (preserve order)
+  const poolItems = Array.from(pool.querySelectorAll('.pill')).map(c=> c.textContent.replace('⠿','').trim());
+  state.poolItems = poolItems;
+  saveState(state);
+  status('Saved ✔');
+}
+
+function restoreRankingFromState(state){
+  // Clear buckets
+  rankWrap.querySelectorAll('.bucket').forEach(b=>{ b.innerHTML=""; b.classList.add('empty'); });
+
+  // Place ranked items if present
+  if (Array.isArray(state.ranking)){
+    state.ranking.forEach((text, slotIdx)=>{
+      if (!text) return;
+      // find card with matching text in pool
+      const card = Array.from(pool.children).find(c=> c.textContent.replace('⠿','').trim() === text);
+      if (card){
+        const bucket = rankWrap.querySelector(`.bucket[data-slot="${slotIdx}"]`);
+        bucket.innerHTML=""; bucket.classList.remove('empty');
+        bucket.appendChild(card);
+      }
+    });
+  }
+}
+
+function shuffle(array){
+  for(let i=array.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [array[i],array[j]] = [array[j],array[i]];
+  }
+  return array;
+}
+
+/* -----------------------------
+   EXPORT
+----------------------------- */
+function getCurrentState(){
+  const state = loadState() || {};
+  // Ensure slider snapshot
+  state.sliders = state.sliders || {};
+  SLIDER_ITEMS.forEach(i=>{
+    const input = document.getElementById('rng_'+i.key);
+    if (input) state.sliders[i.key] = Number(input.value);
+  });
+  // Ensure ranking snapshot
+  persistRanking(state);
+  return state;
+}
+
+function toCSV(state){
+  const headers = [
+    "confidence","belonging","prepared","stress",
+    ...Array.from({length:RANK_SLOTS}, (_,i)=>`rank_${i+1}`)
+  ];
+  const sliders = headers.slice(0,4).map(k=> state.sliders?.[k] ?? "");
+  const ranks = Array.from({length:RANK_SLOTS}, (_,i)=> state.ranking?.[i] ?? "");
+  const all = sliders.concat(ranks).map(v => `"${String(v).replace(/"/g,'""')}"`);
+  return headers.join(',') + "\n" + all.join(',');
+}
+
+/* -----------------------------
+   INIT
+----------------------------- */
+(function init(){
+  const saved = loadState() || { sliders:{}, ranking:Array(RANK_SLOTS).fill(null), poolItems:DEFAULT_FACTORS.slice() };
+
+  // Section 1
+  buildSliders(saved);
+  $("#resetSliders").addEventListener('click', ()=>{
+    SLIDER_ITEMS.forEach(i=>{
+      const input = $('#rng_'+i.key), val = 5;
+      input.value = String(val);
+      $('#val_'+i.key).textContent = String(val);
+      $('#emo_'+i.key).textContent = emojiFor(val);
+      saved.sliders[i.key] = val;
+    });
+    saveState(saved); status('Sliders reset.');
+  });
+
+  // Section 2
+  buildRankSlots(saved);
+  buildPool(saved);
+  restoreRankingFromState(saved);
+
+  // Pool drag target: allow dropping back to pool
+  pool.addEventListener('dragover', e=>{ e.preventDefault(); });
+  pool.addEventListener('drop', e=>{
+    e.preventDefault();
+    const id = e.dataTransfer.getData('text/plain');
+    const card = document.getElementById(id);
+    if (!card) return;
+    pool.appendChild(card);
+    persistRanking(saved);
+  });
+
+  // Buttons
+  $("#shufflePool").addEventListener('click', ()=>{
+    const items = Array.from(pool.querySelectorAll('.pill'));
+    const texts = items.map(c=> c.textContent.replace('⠿','').trim());
+    shuffle(texts);
+    pool.innerHTML="";
+    texts.forEach((t,idx)=> pool.appendChild(makeCard(t,'card_'+idx+'_'+Math.random().toString(36).slice(2,7))));
+    persistRanking(saved);
+    status('Pool shuffled.');
+  });
+
+  $("#clearRanks").addEventListener('click', ()=>{
+    // Move all cards from buckets to pool
+    rankWrap.querySelectorAll('.bucket').forEach(b=>{
+      const card = b.querySelector('.pill');
+      if (card) pool.appendChild(card);
+      b.innerHTML=""; b.classList.add('empty');
+    });
+    persistRanking(saved);
+    status('Ranks cleared.');
+  });
+
+  $("#addCustom").addEventListener('click', ()=>{
+    const text = prompt("Add a custom factor:");
+    if (!text) return;
+    const card = makeCard(text, 'card_custom_'+Math.random().toString(36).slice(2,8));
+    pool.appendChild(card);
+    // update state poolItems
+    const s = loadState() || {};
+    s.poolItems = Array.from(pool.querySelectorAll('.pill')).map(c=> c.textContent.replace('⠿','').trim());
+    saveState(s);
+    status('Custom factor added.');
+  });
+
+  // Export & reset
+  $("#exportJSON").addEventListener('click', ()=>{
+    const state = getCurrentState();
+    const payload = {
+      collected_at: new Date().toISOString(),
+      sliders: state.sliders,
+      ranking: state.ranking,
+      unranked_pool: state.poolItems
+    };
+    download('rotation_reflection.json', JSON.stringify(payload,null,2), 'application/json');
+  });
+
+  $("#exportCSV").addEventListener('click', ()=>{
+    const state = getCurrentState();
+    download('rotation_reflection.csv', toCSV(state), 'text/csv');
+  });
+
+  $("#resetAll").addEventListener('click', ()=>{
+    if (!confirm("This will clear all inputs and local autosave. Continue?")) return;
+    localStorage.removeItem(SAVE_KEY);
+    // Rebuild everything fresh
+    const fresh = { sliders:{}, ranking:Array(RANK_SLOTS).fill(null), poolItems:DEFAULT_FACTORS.slice() };
+    buildSliders(fresh);
+    buildRankSlots(fresh);
+    buildPool(fresh);
+    restoreRankingFromState(fresh);
+    saveState(fresh);
+    status('All data cleared.');
+  });
+
+  status('Autosave active.');
+})();
+</script>
+</body>
+</html>

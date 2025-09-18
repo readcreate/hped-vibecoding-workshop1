@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Rotation Reflection Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #1e5799 0%, #207cca 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+        }
+        
+        .wheel-container {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .wheel-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1e5799;
+            font-size: 1.4rem;
+        }
+        
+        #reflection-wheel {
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .wheel-segment {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
+            transform-origin: 50% 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .segment-label {
+            position: absolute;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        .rating-display {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .notes-container {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .notes-title {
+            font-size: 1.4rem;
+            color: #1e5799;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        textarea {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 150px;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #207cca;
+            box-shadow: 0 0 0 3px rgba(30, 87, 153, 0.2);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #export-btn {
+            background: linear-gradient(90deg, #28a745 0%, #218838 100%);
+            color: white;
+        }
+        
+        #reset-btn {
+            background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .rating-info {
+            background: #f0f8ff;
+            border-left: 4px solid #1e5799;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+        
+        .rating-info h3 {
+            color: #1e5799;
+            margin-bottom: 10px;
+        }
+        
+        .rating-explanation {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .rating-level {
+            text-align: center;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .level-1 { background: #ffcccc; color: #cc0000; }
+        .level-2 { background: #ffcc99; color: #cc6600; }
+        .level-3 { background: #ffffcc; color: #cc9900; }
+        .level-4 { background: #ccffcc; color: #009900; }
+        .level-5 { background: #99ff99; color: #006600; }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            #reflection-wheel {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Clinical Rotation Reflection Tool</h1>
+            <p class="subtitle">Visualize and reflect on your experiences during clinical rotations. Drag the segments to rate different aspects of your week.</p>
+        </header>
+        
+        <div class="content">
+            <div class="wheel-container">
+                <h2 class="wheel-title">Weekly Reflection Wheel</h2>
+                <div id="reflection-wheel"></div>
+                
+                <div class="rating-info">
+                    <h3>Rating Scale</h3>
+                    <div class="rating-explanation">
+                        <div class="rating-level level-1">1: Needs Improvement</div>
+                        <div class="rating-level level-2">2: Developing</div>
+                        <div class="rating-level level-3">3: Proficient</div>
+                        <div class="rating-level level-4">4: Advanced</div>
+                        <div class="rating-level level-5">5: Exemplary</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notes-container">
+                <h2 class="notes-title">Additional Reflections</h2>
+                <textarea id="reflection-notes" placeholder="Add any additional thoughts, insights, or specific experiences from your week..."></textarea>
+                
+                <div class="btn-group">
+                    <button id="export-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 22 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <line x1="10" y1="9" x2="8" y2="9"></line>
+                        </svg>
+                        Export as CSV
+                    </button>
+                    <button id="reset-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-3.88"></path>
+                        </svg>
+                        Reset All
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Medical Trainee Reflection Tool &copy; 2023 | Designed for clinical rotation feedback</p>
+        </footer>
+    </div>
+
+    <script>
+        // Categories for reflection
+        const categories = [
+            "Knowledge Application",
+            "Clinical Skills",
+            "Patient Communication",
+            "Team Collaboration",
+            "Professionalism",
+            "Time Management",
+            "Critical Thinking",
+            "Emotional Resilience"
+        ];
+        
+        // Initialize ratings (default to 3 - Proficient)
+        const ratings = categories.reduce((obj, category) => {
+            obj[category] = 3;
+            return obj;
+        }, {});
+        
+        // DOM elements
+        const wheel = document.getElementById('reflection-wheel');
+        const notesTextarea = document.getElementById('reflection-notes');
+        const exportBtn = document.getElementById('export-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        
+        // Create the reflection wheel
+        function createWheel() {
+            wheel.innerHTML = '';
+            
+            const center = wheel.clientWidth / 2;
+            const radius = Math.min(wheel.clientWidth, wheel.clientHeight) / 2.5;
+            
+            categories.forEach((category, index) => {
+                // Calculate angle for this segment
+                const angle = (index * 45 * Math.PI / 180) - (Math.PI / 2);
+                
+                // Create segment container
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.transform = `rotate(${index * 45}deg)`;
+                segment.dataset.category = category;
+                
+                // Create segment label
+                const label = document.createElement('div');
+                label.className = 'segment-label';
+                label.textContent = category;
+                label.style.transform = `rotate(${index * 45}deg) translateY(-${radius * 0.7}px)`;
+                segment.appendChild(label);
+                
+                // Create rating display
+                const ratingDisplay = document.createElement('div');
+                ratingDisplay.className = 'rating-display';
+                ratingDisplay.textContent = ratings[category];
+                ratingDisplay.style.transform = `rotate(${index * 45}deg) translateY(-${radius * 0.7}px)`;
+                ratingDisplay.dataset.rating = ratings[category];
+                segment.appendChild(ratingDisplay);
+                
+                // Add event listeners for dragging
+                makeSegmentDraggable(segment, category, angle, center, radius);
+                
+                // Add to wheel
+                wheel.appendChild(segment);
+            });
+        }
+        
+        // Make segments draggable to adjust ratings
+        function makeSegmentDraggable(segment, category, angle, centerX, centerY) {
+            let isDragging = false;
+            let startY, startRating;
+            
+            segment.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startY = e.clientY;
+                startRating = ratings[category];
+                
+                // Highlight the segment
+                segment.style.boxShadow = '0 0 0 3px rgba(30, 87, 153, 0.5)';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaY = e.clientY - startY;
+                const sensitivity = 0.1;
+                let newRating = startRating + deltaY * sensitivity;
+                
+                // Clamp between 1 and 5
+                newRating = Math.max(1, Math.min(5, Math.round(newRating)));
+                
+                // Update rating
+                ratings[category] = newRating;
+                updateRatingDisplay(segment, newRating);
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                segment.style.boxShadow = 'none';
+            });
+            
+            // Touch support
+            segment.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                startRating = ratings[category];
+                
+                segment.style.boxShadow = '0 0 0 3px rgba(30, 87, 153, 0.5)';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaY = e.touches[0].clientY - startY;
+                const sensitivity = 0.1;
+                let newRating = startRating + deltaY * sensitivity;
+                
+                newRating = Math.max(1, Math.min(5, Math.round(newRating)));
+                
+                ratings[category] = newRating;
+                updateRatingDisplay(segment, newRating);
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+                segment.style.boxShadow = 'none';
+            });
+        }
+        
+        // Update the visual display of a rating
+        function updateRatingDisplay(segment, rating) {
+            const display = segment.querySelector('.rating-display');
+            display.textContent = rating;
+            
+            // Update color based on rating
+            const colors = ['#ff6b6b', '#ff9e6b', '#ffe66d', '#6bcB63', '#4caf50'];
+            display.style.backgroundColor = colors[rating - 1] + '22';
+            display.style.color = colors[rating - 1];
+            
+            // Update segment color
+            segment.style.background = `linear-gradient(${90 + rating * 9}deg, ${colors[rating - 1]}22, #ffffff22)`;
+        }
+        
+        // Export data as CSV
+        function exportToCSV() {
+            // Prepare CSV content
+            let csvContent = "Category,Rating\n";
+            
+            // Add category ratings
+            categories.forEach(category => {
+                csvContent += `"${category}",${ratings[category]}\n`;
+            });
+            
+            // Add notes
+            csvContent += `"Additional Notes","${notesTextarea.value.replace(/"/g, '""')}"\n`;
+            
+            // Create a blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', `clinical_rotation_reflection_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show feedback
+            alert('Your reflection data has been exported successfully!');
+        }
+        
+        // Reset all ratings to default (3)
+        function resetAll() {
+            categories.forEach(category => {
+                ratings[category] = 3;
+            });
+            
+            // Update UI
+            document.querySelectorAll('.wheel-segment').forEach(segment => {
+                const category = segment.dataset.category;
+                updateRatingDisplay(segment, ratings[category]);
+            });
+            
+            notesTextarea.value = '';
+            alert('All ratings and notes have been reset to default.');
+        }
+        
+        // Initialize the wheel when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            createWheel();
+            
+            // Add event listeners
+            exportBtn.addEventListener('click', exportToCSV);
+            resetBtn.addEventListener('click', resetAll);
+            
+            // Add window resize handler to redraw wheel on resize
+            window.addEventListener('resize', createWheel);
+        });
+    </script>
+</body>
+</html>
