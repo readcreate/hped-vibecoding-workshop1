@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Eagle's Quest: CPC 1908 Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: none;
+        }
+        .option-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: grab;
+        }
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .drop-zone {
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .drop-zone.drag-over {
+            background-color: #e0f2fe;
+            border-color: #3b82f6;
+        }
+        .feedback {
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <main class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-4xl mx-auto">
+        
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-700">Legal Eagle's Quest</h1>
+            <p class="text-slate-500 mt-1">Navigate a Civil Suit under CPC, 1908</p>
+        </header>
+
+        <!-- Progress and Score -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <span id="progress-text" class="text-sm font-medium text-slate-600">Stage 1 of 5</span>
+                <span id="score" class="text-sm font-bold bg-sky-100 text-sky-800 px-3 py-1 rounded-full">Score: 0</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-sky-500 h-2.5 rounded-full" style="width: 20%"></div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area" class="text-center">
+            
+            <!-- Scenario/Question -->
+            <div id="scenario" class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
+                <p class="text-lg font-semibold" id="question-text">A client wants to sue for breach of contract. What is the very first document you must file in court to initiate the suit?</p>
+            </div>
+
+            <!-- Drop Zone -->
+            <div id="drop-zone" class="drop-zone border-4 border-dashed border-slate-300 rounded-2xl p-8 md:p-12 my-6 bg-slate-100 flex flex-col items-center justify-center min-h-[150px]">
+                 <svg class="w-16 h-16 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="font-bold text-slate-500">Drag the Correct Legal Step Here</p>
+            </div>
+
+            <!-- Options -->
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area" class="mt-4 min-h-[50px]"></div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-green-600">Quest Complete!</h2>
+            <p class="text-slate-600 mt-2">You've successfully navigated the civil suit.</p>
+            <p class="text-2xl mt-4">Final Score: <span id="final-score" class="font-bold"></span></p>
+            <div class="mt-8 flex justify-center gap-4">
+                <button id="export-btn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">Export Results (CSV)</button>
+                <button id="play-again-btn" class="bg-slate-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-700 transition-colors">Play Again</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const gameData = [
+            {
+                question: "A client wants to sue for breach of contract. What is the very first document you must file in court to initiate the suit?",
+                options: ["Written Statement", "Plaint", "Affidavit"],
+                answer: "Plaint",
+                explanation: "Correct! A 'Plaint' (Order 7) is the document that formally sets out a plaintiff's claims, initiating the lawsuit."
+            },
+            {
+                question: "You've filed the Plaint. What must the court issue to the defendant to notify them of the lawsuit?",
+                options: ["Summons", "Warrant", "Injunction"],
+                answer: "Summons",
+                explanation: "Exactly! The court issues a 'Summons' (Section 27, Order 5) to legally notify the defendant and require their appearance."
+            },
+            {
+                question: "The defendant has received the summons. What is the name of their formal reply to the Plaint?",
+                options: ["Counter-Claim", "Rejoinder", "Written Statement"],
+                answer: "Written Statement",
+                explanation: "Perfect! The 'Written Statement' (Order 8) is the defendant's pleading, where they admit or deny the allegations in the Plaint."
+            },
+            {
+                question: "Both parties have filed their main documents. What is the stage where the court identifies the main points of disagreement?",
+                options: ["Framing of Issues", "Final Arguments", "Cross-Examination"],
+                answer: "Framing of Issues",
+                explanation: "Well done! The 'Framing of Issues' (Order 14) is a crucial step where the court pinpoints the contested questions of fact and law."
+            },
+            {
+                question: "After all evidence and arguments, the judge delivers their decision. What is this final decision called?",
+                options: ["Order", "Decree", "Notice"],
+                answer: "Decree",
+                explanation: "Correct! A 'Decree' (Section 2(2)) is the final, formal expression of the court's decision which conclusively determines the rights of the parties."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let attempts = 0;
+        const results = [];
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const dropZone = document.getElementById('drop-zone');
+        const feedbackArea = document.getElementById('feedback-area');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        function loadQuestion(index) {
+            if (index >= gameData.length) {
+                showEndScreen();
+                return;
+            }
+            
+            const question = gameData[index];
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = '';
+            feedbackArea.innerHTML = '';
+            attempts = 0;
+
+            // Shuffle options for variety
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const optionEl = document.createElement('div');
+                optionEl.textContent = option;
+                optionEl.className = 'option-card bg-sky-100 text-sky-800 p-4 rounded-lg font-medium shadow-sm border border-sky-200';
+                optionEl.draggable = true;
+                optionEl.dataset.value = option;
+                optionEl.addEventListener('dragstart', handleDragStart);
+                optionsContainer.appendChild(optionEl);
+            });
+            
+            updateProgress();
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.value);
+        }
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const droppedValue = e.dataTransfer.getData('text/plain');
+            checkAnswer(droppedValue);
+        });
+
+        function checkAnswer(selectedValue) {
+            const correctAnswer = gameData[currentQuestionIndex].answer;
+            const explanation = gameData[currentQuestionIndex].explanation;
+            
+            let isCorrect = selectedValue === correctAnswer;
+            
+            if (isCorrect) {
+                // Award points based on attempts
+                if(attempts === 0) {
+                    score += 10;
+                } else {
+                    score += 5; // Penalty for wrong first attempt
+                }
+                
+                feedbackArea.innerHTML = `<div class="feedback bg-green-100 text-green-800 p-3 rounded-lg"><p class="font-bold">Correct!</p><p>${explanation}</p></div>`;
+                scoreDisplay.textContent = `Score: ${score}`;
+                
+                results.push({
+                    question: gameData[currentQuestionIndex].question,
+                    answer: selectedValue,
+                    status: 'Correct',
+                    attempts: attempts + 1
+                });
+                
+                // Disable options and wait before loading next question
+                optionsContainer.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    loadQuestion(currentQuestionIndex);
+                    optionsContainer.style.pointerEvents = 'auto';
+                }, 2500);
+
+            } else {
+                attempts++;
+                feedbackArea.innerHTML = `<div class="feedback bg-red-100 text-red-800 p-3 rounded-lg"><p class="font-bold">Not quite.</p><p>That's not the right step. Think about the process and try again!</p></div>`;
+                
+                // Animate the dropzone to indicate wrong answer
+                dropZone.animate([
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(0px)' }
+                ], {
+                    duration: 300,
+                    iterations: 1
+                });
+            }
+        }
+        
+        function updateProgress() {
+            const progressPercentage = ((currentQuestionIndex) / gameData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            if (currentQuestionIndex < gameData.length) {
+                progressText.textContent = `Stage ${currentQuestionIndex + 1} of ${gameData.length}`;
+            }
+        }
+
+        function showEndScreen() {
+            document.getElementById('game-area').classList.add('hidden');
+            const endScreen = document.getElementById('end-screen');
+            endScreen.classList.remove('hidden');
+            document.getElementById('final-score').textContent = score;
+            // Final progress bar update
+             progressBar.style.width = `100%`;
+             progressText.textContent = `Completed!`;
+
+        }
+        
+        document.getElementById('export-btn').addEventListener('click', () => {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Question,Answer,Status,Attempts\r\n";
+            results.forEach(row => {
+                let question = `"${row.question}"`;
+                csvContent += [question, row.answer, row.status, row.attempts].join(',') + "\r\n";
+            });
+            csvContent += `\r\nFinal Score,${score},,\r\n`;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "cpc_quest_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        document.getElementById('play-again-btn').addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            results.length = 0;
+            scoreDisplay.textContent = 'Score: 0';
+            document.getElementById('end-screen').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            loadQuestion(currentQuestionIndex);
+        });
+
+        // Initial load
+        window.onload = () => loadQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>
