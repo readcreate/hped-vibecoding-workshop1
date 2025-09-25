@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPR Knowledge Check</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --bg-color: #f3f4f6;
+            --card-bg: #fff;
+            --text-color: #1f2937;
+            --border-radius: 0.75rem;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        #nameInput {
+            width: calc(100% - 2rem);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            border: 2px solid #e5e7eb;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        #nameInput:focus {
+            border-color: var(--primary-color);
+        }
+        .button {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .button.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .button.primary:hover {
+            background-color: #2563eb;
+        }
+        .button.success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        .button.success:hover {
+            background-color: #16a34a;
+        }
+        .button:active {
+            transform: scale(0.98);
+        }
+        .hidden {
+            display: none;
+        }
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .step-button {
+            background-color: var(--card-bg);
+            border: 2px solid #d1d5db;
+            color: var(--text-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+        }
+        .step-button:hover {
+            border-color: var(--primary-color);
+        }
+        .step-button.correct {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+            cursor: default;
+        }
+        .step-button.incorrect {
+            background-color: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+            cursor: default;
+        }
+        .feedback {
+            margin-top: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        #results-container ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-top: 1.5rem;
+        }
+        #results-container li {
+            background-color: var(--bg-color);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-container">
+            <h1>CPR Knowledge Check</h1>
+            <h2>Let's review the basics.</h2>
+            <p>Enter your name to begin the interactive quiz and log your attendance.</p>
+            <div class="input-group">
+                <input type="text" id="nameInput" placeholder="Your Full Name">
+            </div>
+            <button class="button primary" id="startButton">Start Quiz</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-container" class="hidden">
+            <h2 id="question-prompt"></h2>
+            <div id="steps-container" class="step-container"></div>
+            <div id="feedback-message" class="feedback"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-container" class="hidden">
+            <h1>Quiz Complete!</h1>
+            <p>Thank you for completing the knowledge check.</p>
+            <p id="final-score-text"></p>
+            <p id="final-time-text"></p>
+            <button class="button success" id="exportButton">Export CSV</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                prompt: 'What is the correct sequence of steps to take before performing CPR?',
+                steps: [
+                    'Check the scene for safety',
+                    'Check for responsiveness (tap and shout)',
+                    'Shout for help and tell someone to call 911',
+                    'Get an AED (if available)'
+                ],
+                correctOrder: [0, 1, 2, 3]
+            },
+            {
+                prompt: 'What is the correct compression rate for an adult?',
+                steps: [
+                    '30 compressions',
+                    '15 compressions',
+                    '120 compressions'
+                ],
+                correctOrder: [0], // For this question, only the first click matters
+            },
+            {
+                prompt: 'Where on the chest should you place your hands for compressions?',
+                steps: [
+                    'On the upper right side of the chest',
+                    'On the center of the chest',
+                    'On the lower left side of the chest'
+                ],
+                correctOrder: [1],
+            }
+        ];
+
+        let studentName = '';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let questionAttempts = 0;
+        let startTime = 0;
+        let finalResults = [];
+
+        const elements = {
+            welcome: document.getElementById('welcome-container'),
+            quiz: document.getElementById('quiz-container'),
+            results: document.getElementById('results-container'),
+            nameInput: document.getElementById('nameInput'),
+            startButton: document.getElementById('startButton'),
+            questionPrompt: document.getElementById('question-prompt'),
+            stepsContainer: document.getElementById('steps-container'),
+            feedbackMessage: document.getElementById('feedback-message'),
+            finalScoreText: document.getElementById('final-score-text'),
+            finalTimeText: document.getElementById('final-time-text'),
+            exportButton: document.getElementById('exportButton')
+        };
+
+        elements.startButton.addEventListener('click', () => {
+            studentName = elements.nameInput.value.trim();
+            if (studentName) {
+                elements.welcome.classList.add('hidden');
+                elements.quiz.classList.remove('hidden');
+                startTime = Date.now();
+                loadQuestion();
+            } else {
+                elements.nameInput.style.borderColor = '#ef4444';
+                elements.nameInput.placeholder = 'Please enter your name!';
+            }
+        });
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                return finishQuiz();
+            }
+
+            elements.feedbackMessage.textContent = '';
+            elements.stepsContainer.innerHTML = '';
+            questionAttempts = 0;
+
+            const q = questions[currentQuestionIndex];
+            elements.questionPrompt.textContent = q.prompt;
+
+            q.steps.forEach((stepText, index) => {
+                const stepButton = document.createElement('button');
+                stepButton.className = 'step-button';
+                stepButton.textContent = stepText;
+                stepButton.addEventListener('click', () => handleStepClick(index, stepButton));
+                elements.stepsContainer.appendChild(stepButton);
+            });
+        }
+
+        function handleStepClick(selectedIndex, button) {
+            const q = questions[currentQuestionIndex];
+            const correctIndex = q.correctOrder[questionAttempts];
+            
+            // Check for correct order
+            if (selectedIndex === correctIndex) {
+                button.classList.add('correct');
+                elements.feedbackMessage.textContent = 'Correct!';
+                score++;
+                questionAttempts++;
+
+                if (questionAttempts === q.correctOrder.length) {
+                    finalResults.push({
+                        question: q.prompt,
+                        correct: true,
+                    });
+                    
+                    // All parts of this question are answered correctly, move to next
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        loadQuestion();
+                    }, 1000);
+                }
+            } else {
+                button.classList.add('incorrect');
+                elements.feedbackMessage.textContent = 'Incorrect, try again!';
+                
+                finalResults.push({
+                    question: q.prompt,
+                    correct: false,
+                });
+
+                // Reset buttons for retry
+                setTimeout(() => {
+                    elements.stepsContainer.querySelectorAll('.step-button').forEach(btn => {
+                        btn.classList.remove('incorrect', 'correct');
+                    });
+                    elements.feedbackMessage.textContent = '';
+                }, 1500);
+            }
+        }
+
+        function finishQuiz() {
+            const endTime = Date.now();
+            const totalTime = ((endTime - startTime) / 1000).toFixed(1);
+
+            elements.quiz.classList.add('hidden');
+            elements.results.classList.remove('hidden');
+            elements.finalScoreText.textContent = `You answered ${score} out of ${questions.length} questions correctly.`;
+            elements.finalTimeText.textContent = `Time taken: ${totalTime} seconds.`;
+        }
+
+        elements.exportButton.addEventListener('click', () => {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Name,Correct Answers,Total Questions,Time Taken (s)\n";
+            csvContent += `${studentName},${score},${questions.length},${((Date.now() - startTime) / 1000).toFixed(1)}\n`;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${studentName}_CPR_Results.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
