@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Torque Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      min-height: 100vh;
+    }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .input-group { margin: 10px 0; display: flex; align-items: center; gap: 10px; }
+    input[type="number"], select { padding: 6px 10px; font-size: 1rem; border-radius: 5px; border: none; width: 110px; }
+    .container {
+      background: rgba(255,255,255,0.12);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+    }
+    .results { margin-top: 20px; text-align: center; font-size: 1.2rem; }
+    .result-number { font-weight: bold; color: #00ffd5; }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 15px;
+    }
+    #submitBtn { background: #00ffa6; color: #003; }
+    #resetBtn  { background: #ff6b6b; color: #fff; margin-left:10px; }
+    .footer { margin-top: auto; text-align: center; font-size: 0.8rem; color: #aaa; }
+  </style>
+</head>
+<body>
+
+  <h1>🦵 Torque Calculator (N·m / kg)</h1>
+
+  <div class="container">
+
+    <div class="input-group">
+      <label>Body Weight:</label>
+      <input type="number" id="bwValue" step="any" min="0" />
+      <select id="bwUnit">
+        <option value="kg">kg</option>
+        <option value="lb">lb</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Ankle Force / Torque:</label>
+      <input type="number" id="forceValue" step="any" min="0" />
+      <select id="forceUnit">
+        <option value="N">N (Force)</option>
+        <option value="kg">kg (Mass)</option>
+        <option value="lb">lb (Mass)</option>
+        <option value="Nm">N·m (Torque)</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Length:</label>
+      <input type="number" id="lengthValue" step="any" min="0" />
+      <select id="lengthUnit">
+        <option value="m">m</option>
+        <option value="cm">cm</option>
+        <option value="in">in</option>
+      </select>
+    </div>
+
+    <!-- Buttons -->
+    <button id="submitBtn" type="button">Submit</button>
+    <button id="resetBtn"  type="button">Reset</button>
+
+    <!-- Results (hidden until submit) -->
+    <div class="results" id="resultsBox" style="display:none;">
+      🌀 Torque: <span class="result-number" id="torque">0.00</span> N·m<br><br>
+      ⚖️ Torque / BW: <span class="result-number" id="torqueBW">0.00</span> N·m/kg
+    </div>
+
+  </div>
+
+  <div class="footer">Built using pure HTML + Vanilla JS · No libraries needed</div>
+
+  <script>
+    const g = 9.81;
+
+    const bwValue = document.getElementById("bwValue");
+    const bwUnit = document.getElementById("bwUnit");
+    const forceValue = document.getElementById("forceValue");
+    const forceUnit = document.getElementById("forceUnit");
+    const lengthValue = document.getElementById("lengthValue");
+    const lengthUnit = document.getElementById("lengthUnit");
+
+    function convertForceToNewtons(value, unit) {
+      if (unit === 'N') return value;
+      if (unit === 'kg') return value * g;
+      if (unit === 'lb') return value * 4.44822;
+      return 0;
+    }
+
+    function convertLengthToMeters(value, unit) {
+      if (unit === 'm') return value;
+      if (unit === 'cm') return value / 100;
+      if (unit === 'in') return value * 0.0254;
+      return 0;
+    }
+
+    function convertBWToKg(value, unit) {
+      if (unit === 'kg') return value;
+      if (unit === 'lb') return value * 0.45359237;
+      return 0;
+    }
+
+    function calculateResults() {
+      const bw = parseFloat(bwValue.value || 0);
+      const force = parseFloat(forceValue.value || 0);
+      const length = parseFloat(lengthValue.value || 0);
+
+      if (bw <= 0 || force <= 0) {
+        document.getElementById("resultsBox").style.display = "none";
+        return;
+      }
+
+      const bwKg = convertBWToKg(bw, bwUnit.value);
+      let torqueValue;
+
+      if (forceUnit.value === 'Nm') {
+        torqueValue = force;
+      } else {
+        const forceN = convertForceToNewtons(force, forceUnit.value);
+        const lengthM = convertLengthToMeters(length, lengthUnit.value);
+        torqueValue = forceN * lengthM;
+      }
+
+      const torquePerKgValue = bwKg > 0 ? torqueValue / bwKg : 0;
+
+      document.getElementById("torque").textContent = torqueValue.toFixed(2);
+      document.getElementById("torqueBW").textContent = torquePerKgValue.toFixed(2);
+      document.getElementById("resultsBox").style.display = "block";
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", calculateResults);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      bwValue.value = "";
+      forceValue.value = "";
+      lengthValue.value = "";
+      document.getElementById("resultsBox").style.display = "none";
+    });
+  </script>
+
+</body>
+</html>
