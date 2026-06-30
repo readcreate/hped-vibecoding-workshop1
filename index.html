@@ -36,7 +36,7 @@
 
     /* Layout */
     .app{display:grid; grid-template-columns: 300px 1fr; gap: var(--gap); max-width: 1200px; margin: 0 auto; padding: 16px;}
-    @media (max-width: 900px){ .app{grid-template-columns: 1fr;} #sidebar{position: fixed; inset: 0 40% 0 0; max-width: 380px; transform: translateX(-101%); transition: transform var(--trans); z-index: 30;} #sidebar.open{transform: translateX(0);} .outline-toggle{display:inline-flex;} }
+    @media (max-width: 900px){ .app{grid-template-columns: 1fr;} }
 
     header.top{
       grid-column: 1 / -1; background: linear-gradient(135deg, rgba(124,77,255,.25), rgba(0,229,255,.25));
@@ -104,8 +104,14 @@
     .quiz .result{margin-top: 8px; font-weight: 600}
 
     /* Utility */
-    .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap);} 
-    @media (max-width: 900px){.grid-2{grid-template-columns:1fr}}
+    .grid-2{display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap);}
+    /* Mobile sidebar backdrop */
+    #sidebar-backdrop{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:29;}
+    #sidebar-backdrop.open{display:block;}
+    /* TOC link text wrapping */
+    #toc a span{word-break:break-word; line-height:1.3;}
+    /* Mobile close button — hidden by default, shown via media query below */
+    .sidebar-close{display:none;}
     .mt-0{margin-top:0}
     .mb-0{margin-bottom:0}
     .mb-8{margin-bottom:8px}
@@ -138,7 +144,22 @@
     margin-left: 20px;
   }
 
-  
+  /* ===== Mobile overrides — must come AFTER base rules ===== */
+  @media (max-width: 900px){
+    .grid-2{grid-template-columns:1fr}
+    #sidebar{
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: min(300px, 85vw);
+      transform: translateX(-110%);
+      transition: transform 200ms ease;
+      z-index: 30;
+      overflow-y: auto;
+    }
+    #sidebar.open{transform: translateX(0);}
+    .outline-toggle{display:inline-flex;}
+    .sidebar-close{display:inline-flex; margin-bottom:8px;}
+  }
 
   </style>
 </head>
@@ -148,15 +169,17 @@
     <header class="top">
       <h1>Exploring generative AI in health professions education: simple interactive apps with vibe coding</h1>
       <div class="meta">
-        <span class="chip" title="Time"><span>🕒</span> 3:45–5:00 p.m. ET · Sep 25 2025</span>
+        <span class="chip" title="Time"><span>🕒</span> 12:00–1:00 p.m. ET · Jun 30 2026</span>
         <span class="chip" title="Instructor"><span>👤</span> Instructor: <a href="mailto:akumar@mghihp.edu">Anshul Kumar</a></span>
         <span class="chip" title="Mode"><span>🖥️</span> Virtual · Synchronous</span>
       </div>
     </header>
 
+    <div id="sidebar-backdrop"></div>
     <!-- Sidebar / Outline -->
     <aside id="sidebar">
       <h2>Workshop Outline</h2>
+      <button class="btn ghost sidebar-close" id="btnCloseSidebar"><span>✕</span> Close</button>
       <div class="button-row mb-12">
         <!-- <button class="btn secondary" id="btnPopOut"><span>🪟</span>Pop out</button> -->
         <button class="btn ghost" id="btnBackToTop"><span>⬆️</span>Top</button>
@@ -212,7 +235,8 @@
             </ol> -->
             <p>While there is no mandatory preparation work, it would help us move through the workshop efficiently if you open these items on your computer before we start:</p>
 <ol>
-  <li>Open the workshop guide document in your web browser on your computer: 
+  <li>Please take the pre-workshop survey: <a href="https://redcap.partners.org/redcap/surveys/?s=FRWM9KXPALXEC7JF" target="_blank" rel="noopener">https://redcap.partners.org/redcap/surveys/?s=FRWM9KXPALXEC7JF</a></li>
+  <li>Open the workshop guide document in your web browser on your computer:
     <a href="http://tinyurl.com/hpedVibe" target="_blank" rel="noopener">http://tinyurl.com/hpedVibe</a>.
   </li>
   <li>Open one chatbot (or more if you want) in your web browser on your computer. Here are some suggestions:
@@ -271,42 +295,37 @@
   </tr></thead>
 <tbody>
   <tr>
-    <td class="tg-0lax">3:45 p.m. ET</td>
+    <td class="tg-0lax">12:00 p.m. ET</td>
     <td class="tg-0lax">5 minutes</td>
     <td class="tg-0lax">Pre-workshop survey</td>
   </tr>
   <tr>
-    <td class="tg-0lax">3:50</td>
+    <td class="tg-0lax">12:05</td>
     <td class="tg-0lax">5 minutes</td>
-    <td class="tg-0lax">What is vibe coding?</td>
+    <td class="tg-0lax">Definition and examples of vibe coding</td>
   </tr>
   <tr>
-    <td class="tg-0lax">3:55</td>
-    <td class="tg-0lax">5 minutes</td>
-    <td class="tg-0lax">Examples of vibe coding</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">4:05</td>
-    <td class="tg-0lax">15 minutes</td>
+    <td class="tg-0lax">12:10</td>
+    <td class="tg-0lax">10 minutes</td>
     <td class="tg-0lax">Make a new app with entire class</td>
   </tr>
   <tr>
-    <td class="tg-0lax">4:20</td>
+    <td class="tg-0lax">12:20</td>
     <td class="tg-0lax">15 minutes</td>
     <td class="tg-0lax">Make your own new app in small groups</td>
   </tr>
   <tr>
-    <td class="tg-0lax">4:35</td>
+    <td class="tg-0lax">12:35</td>
     <td class="tg-0lax">10 minutes</td>
     <td class="tg-0lax">Share apps</td>
   </tr>
   <tr>
-    <td class="tg-0lax">4:45</td>
+    <td class="tg-0lax">12:45</td>
     <td class="tg-0lax">5 minutes</td>
     <td class="tg-0lax">Post-workshop survey</td>
   </tr>
   <tr>
-    <td class="tg-0lax">4:50</td>
+    <td class="tg-0lax">12:50</td>
     <td class="tg-0lax">5 minutes</td>
     <td class="tg-0lax">Discussion and next steps</td>
   </tr>
@@ -757,6 +776,12 @@
           <li>follow proper app design and development principles.</li>
           <li>automatically send user/learner results to a teacher, supervisor, or researcher.</li>
         </ul>
+        <p></p>
+        <hr>
+        <div style="text-align:center; margin-top:16px; padding:20px; background:rgba(124,77,255,0.15); border:2px solid rgba(124,77,255,0.5); border-radius:var(--radius);">
+          <p style="font-size:1.15em; font-weight:700; margin:0 0 14px;">🙏 Thank you for attending! Please take a moment to complete the post-workshop survey.</p>
+          <a href="https://redcap.partners.org/redcap/surveys/?s=ETTWHWTDPXEWN3M4" target="_blank" rel="noopener" class="btn" style="font-size:1em;">📝 Take the post-workshop survey</a>
+        </div>
       </section>
 
       <!--<section class="card" data-title="# Knowledge check">
@@ -874,7 +899,7 @@
         h2.textContent = `${n}. ${h2.dataset.original}`;
         sec.id = `s-${n}`;
         // inject anchors for h3/h4 numbering
-        $$('#content section.card h3, h4', sec).forEach(h => {
+        $$('h3, h4', sec).forEach(h => {
           const level = h.tagName === 'H3' ? 1 : 2;
           counters[level]++;
           for(let i=level+1;i<counters.length;i++) counters[i]=0;
@@ -919,7 +944,13 @@
       $('#btnBackToTop').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
       $('#btnPrev').addEventListener('click', ()=> gotoSection(-1));
       $('#btnNext').addEventListener('click', ()=> gotoSection(+1));
-      $('#btnToggleOutline').addEventListener('click', ()=> $('#sidebar').classList.toggle('open'));
+      const _sidebar = $('#sidebar');
+      const _backdrop = $('#sidebar-backdrop');
+      const _closeSidebar = ()=>{ _sidebar.classList.remove('open'); _backdrop.classList.remove('open'); };
+      $('#btnToggleOutline').addEventListener('click', ()=>{ _sidebar.classList.toggle('open'); _backdrop.classList.toggle('open'); });
+      _backdrop.addEventListener('click', _closeSidebar);
+      $('#btnCloseSidebar').addEventListener('click', _closeSidebar);
+      $('#toc').addEventListener('click', e=>{ if(e.target.closest('a') && window.innerWidth<=900) _closeSidebar(); });
       $('#btnMoreEditors').addEventListener('click', ()=> $('#altEditors').style.display = $('#altEditors').style.display==='none'?'block':'none');
 
       // const topicBox = $('#topicBox');
@@ -939,9 +970,9 @@
       // $('#btnCopyPrompt2').addEventListener('click', ()=> doCopy(mainPrompt()));
       // $('#btnCopyFollow').addEventListener('click', ()=> doCopy(followPrompt));
 
-      // Collapsible
-      $('#btnMoreExpl').addEventListener('click', ()=> $('#moreExpl').classList.add('open'));
-      $('#btnHideExpl').addEventListener('click', ()=> $('#moreExpl').classList.remove('open'));
+      // Collapsible (elements may be commented out)
+      $('#btnMoreExpl')?.addEventListener('click', ()=> $('#moreExpl')?.classList.add('open'));
+      $('#btnHideExpl')?.addEventListener('click', ()=> $('#moreExpl')?.classList.remove('open'));
 
 
       // Pop-out buttons (safe if elements are missing)
@@ -963,8 +994,8 @@
 // }
 
 
-      // Quiz grading
-      $('#btnGrade').addEventListener('click', ()=>{
+      // Quiz grading (section may be commented out)
+      $('#btnGrade')?.addEventListener('click', ()=>{
         let correct=0; let total=0;
         $$('#quiz .q').forEach((q,idx)=>{
           total++;
