@@ -1,0 +1,65 @@
+QUICK LINKS
+
+Workshop guide:       https://tinyurl.com/hpedVibe
+
+Pre-workshop survey:  https://redcap.partners.org/redcap/surveys/?s=FRWM9KXPALXEC7JF
+
+Post-workshop survey: https://redcap.partners.org/redcap/surveys/?s=ETTWHWTDPXEWN3M4
+
+---------------------------------------------------------------
+
+WORKSHOP AGENDA
+Exploring generative AI in health professions education: simple interactive apps with vibe coding
+12:00–1:00 p.m. ET · Jun 30 2026
+
+---------------------------------------------------------------
+ TIME       DURATION    ACTIVITY
+---------------------------------------------------------------
+ 12:00 PM   5 min       Pre-workshop survey
+ 12:05      5 min       Definition and examples of vibe coding
+ 12:10      10 min      Make a new app with entire class
+ 12:20      15 min      Make your own new app in small groups
+ 12:35      10 min      Share apps
+ 12:45      5 min       Post-workshop survey
+ 12:50      5 min       Discussion and next steps
+---------------------------------------------------------------
+
+
+You can put your app online on GitHub and 
+dashboard making video- https://youtu.be/-RlHCCKdEa8
+tell chatbot to help you put online and collect data. 
+
+June 30 2026
+
+### Unassigned
+
+* Christina Kaltcheva *(not joined)*
+
+### Room 1
+
+* Jared Henricksen - psych safety app
+* Liz Guerdan
+* Sanam Hanif *(not joined)*
+
+### Room 2
+
+* Anshul 2 *(not joined)*
+* Hani Lababidi
+* Jorge Yarzebski - flight medics orientation
+
+### Room 3
+
+* Farrukh Jafri
+* Jake Smith
+
+### Room 4
+
+* Dr. Sateesh Arja
+* Sandeep Pulim
+* Scott Cook
+
+### Room 5
+
+* Nuha Birido
+* Shelita Kimble (she/her)
+* Zahira Khalid
